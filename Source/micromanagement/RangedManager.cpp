@@ -119,8 +119,8 @@ BWAPI::Unit * RangedManager::getTarget(BWAPI::Unit * rangedUnit, UnitVector & ta
 
 	int highestInRangePriority(0);
 	int highestNotInRangePriority(0);
-	int lowestInRangeHitPoints(10000);
-	int lowestNotInRangeDistance(10000);
+	double highestInRangeDangerRatio(0);
+	double highestNotInRangeDangerRatio(0);
 
 	BWAPI::Unit * inRangeTarget = NULL;
 	BWAPI::Unit * notInRangeTarget = NULL;
@@ -129,25 +129,26 @@ BWAPI::Unit * RangedManager::getTarget(BWAPI::Unit * rangedUnit, UnitVector & ta
 	{
 		int priority = getAttackPriority(rangedUnit, unit);
 		int distance = rangedUnit->getDistance(unit);
+		double dangerRatio = (unit->getType().groundWeapon().damageAmount()) / (unit->getHitPoints());
 
-		// if the unit is in range, update the target with the lowest hp
+		// if the unit is in range, update the target with the highest Danger ratio
 		if (rangedUnit->getDistance(unit) <= range)
 		{
 			if (priority > highestInRangePriority ||
-				(priority == highestInRangePriority && unit->getHitPoints() < lowestInRangeHitPoints))
+				(priority == highestInRangePriority && dangerRatio > highestInRangeDangerRatio))
 			{
-				lowestInRangeHitPoints = unit->getHitPoints();
+				highestInRangeDangerRatio = dangerRatio;
 				highestInRangePriority = priority;
 				inRangeTarget = unit;
 			}
 		}
-		// otherwise it isn't in range so see if it's closest
+		// if not in range, update the not in range target with the highest Danger ratio
 		else
 		{
 			if (priority > highestNotInRangePriority ||
-				(priority == highestNotInRangePriority && distance < lowestNotInRangeDistance))
+				(priority == highestNotInRangePriority && dangerRatio > highestNotInRangeDangerRatio))
 			{
-				lowestNotInRangeDistance = distance;
+				highestNotInRangeDangerRatio = dangerRatio;
 				highestNotInRangePriority = priority;
 				notInRangeTarget = unit;
 			}
@@ -155,6 +156,7 @@ BWAPI::Unit * RangedManager::getTarget(BWAPI::Unit * rangedUnit, UnitVector & ta
 	}
 
 	// if there is a highest priority unit in range, attack it first
+	//BWAPI::Broodwar->printf("Attacking most dangerous");
 	return (highestInRangePriority >= highestNotInRangePriority) ? inRangeTarget : notInRangeTarget;
 }
 
