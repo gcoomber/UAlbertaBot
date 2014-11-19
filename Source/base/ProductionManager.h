@@ -61,12 +61,12 @@ class ProductionManager
 
 	bool						detectBuildOrderDeadlock();
 
-	int							getFreeMinerals();
-	int							getFreeGas();
-
 public:
 
 	static ProductionManager &	Instance();
+
+	int							getFreeMinerals();
+	int							getFreeGas();
 
 	void						drawQueueInformation(std::map<BWAPI::UnitType, int> & numUnits, int x, int y, int index);
 	void						update();

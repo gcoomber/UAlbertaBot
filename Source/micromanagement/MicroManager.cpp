@@ -255,7 +255,10 @@ void MicroManager::trainSubUnits(BWAPI::Unit * unit) const
 	}
 	else if (unit->getType() == BWAPI::UnitTypes::Protoss_Carrier)
 	{
-		unit->train(BWAPI::UnitTypes::Protoss_Interceptor);
+		// Without Carrier Capacity upgrade, Carriers have a max interceptor count of 4. 
+		int maxInterceptorCount = (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Carrier_Capacity) == 0) ? 4 : 8;
+		if (unit->getInterceptorCount() < maxInterceptorCount)
+			unit->train(BWAPI::UnitTypes::Protoss_Interceptor);
 	}
 }
 

@@ -3,6 +3,7 @@
 #include "Common.h"
 #include "micromanagement/MeleeManager.h"
 #include "micromanagement/RangedManager.h"
+#include "micromanagement/AirManager.h"
 #include "micromanagement/DetectorManager.h"
 #include "micromanagement/TransportManager.h"
 #include "SquadOrder.h"
@@ -17,6 +18,7 @@ class ObserverManager;
 
 class MeleeManager;
 class RangedManager;
+class AirManager;
 class DetectorManager;
 
 class Squad
@@ -29,8 +31,9 @@ class Squad
 	SquadOrder			order;
 	MeleeManager		meleeManager;
 	RangedManager		rangedManager;
-	DetectorManager		detectorManager;
+	AirManager			airManager;
 	TransportManager	transportManager;
+	DetectorManager		detectorManager;
 
 	std::map<BWAPI::Unit *, bool>	nearEnemy;
 

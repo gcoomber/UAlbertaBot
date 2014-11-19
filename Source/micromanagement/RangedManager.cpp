@@ -23,6 +23,11 @@ void RangedManager::executeMicro(const UnitVector & targets)
 	{
 		// train sub units such as scarabs or interceptors
 		//trainSubUnits(rangedUnit);
+		
+		if (rangedUnit->getType() == BWAPI::UnitTypes::Protoss_Carrier)
+		{
+			BWAPI::Broodwar->printf("--------------- updating carrier ---------------------");
+		}
 
 		// if the order is to attack or defend
 		if (order.type == order.Attack || order.type == order.Defend) {

@@ -42,6 +42,7 @@ void Squad::update()
 
 		meleeManager.regroup(regroupPosition);
 		rangedManager.regroup(regroupPosition);
+		airManager.regroup(regroupPosition);
 	}
 	else // otherwise, execute micro
 	{
@@ -49,6 +50,7 @@ void Squad::update()
 
 		meleeManager.execute(order);
 		rangedManager.execute(order);
+		airManager.execute(order);
 		transportManager.execute(order);
 
 		detectorManager.setUnitClosestToEnemy(unitClosestToEnemy());
@@ -110,6 +112,7 @@ void Squad::setManagerUnits()
 {
 	UnitVector meleeUnits;
 	UnitVector rangedUnits;
+	UnitVector airUnits;
 	UnitVector detectorUnits;
 	UnitVector transportUnits;
 
@@ -128,6 +131,16 @@ void Squad::setManagerUnits()
 			{
 				transportUnits.push_back(unit);
 			}
+			// Do not micromanage interceptors since they are a sub-unit of the carrier
+			else if (unit->getType() == BWAPI::UnitTypes::Protoss_Interceptor)
+			{
+				continue;
+			}
+			// select flying combat units
+			else if (unit->getType().isFlyer())
+			{
+				airUnits.push_back(unit);
+			}
 			// select ranged units
 			else if ((unit->getType().groundWeapon().maxRange() > 32) || (unit->getType() == BWAPI::UnitTypes::Protoss_Reaver))
 			{
@@ -143,6 +156,7 @@ void Squad::setManagerUnits()
 
 	meleeManager.setUnits(meleeUnits);
 	rangedManager.setUnits(rangedUnits);
+	airManager.setUnits(airUnits);
 	detectorManager.setUnits(detectorUnits);
 	transportManager.setUnits(detectorUnits);
 }
