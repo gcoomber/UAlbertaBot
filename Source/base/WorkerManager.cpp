@@ -528,6 +528,12 @@ void WorkerManager::rebalanceWorkers()
 			// set the worker to idle
 			workerData.setWorkerJob(worker, WorkerData::Idle, NULL);
 		}
+
+		// if we have an idle worker
+		if (workerData.getWorkerJob(worker) == WorkerData::Idle && workerData.getNumIdleWorkers() > 5)
+		{
+			workerData.setWorkerJob(worker, WorkerData::Combat, NULL);
+		}
 	}
 }
 
