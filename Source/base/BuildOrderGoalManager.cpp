@@ -77,11 +77,15 @@ void BuildOrderGoalManager::setBuildOrderGoals()
 	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Nexus), 1, 1000);	// 1	Nexus
 	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Probe), 1, 1000);	// 1	Probe
 
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		12,		98);	// 12	Zealot
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Nexus),		2,		96);	// 2	Nexus
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	3,		94);	// 3	Gateway
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		18,		92);	// 18	Zealot
-	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	5,		90);
+	/*addGoal(MetaType(BWAPI::UnitTypes::Protoss_Cybernetics_Core),		1,		98);
+	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Citadel_of_Adun),		1,		96);
+	addGoal(MetaType(BWAPI::UpgradeTypes::Leg_Enhancements),		1,		94);*/
+
+	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		12,		92);	// 12	Zealot
+	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Nexus),		2,		90);	// 2	Nexus
+	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	3,		88);	// 3	Gateway
+	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Zealot),		18,		86);	// 18	Zealot
+	addGoal(MetaType(BWAPI::UnitTypes::Protoss_Gateway),	5,		84);
 
 	// sort the goals to make things quicker for us
 	std::sort(goals.begin(), goals.end());
