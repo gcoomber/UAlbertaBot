@@ -32,6 +32,7 @@ public:
 	void						handleGasWorkers();
 	void						handleMoveWorkers();
 	void						handleCombatWorkers();
+	void						handleKamikazeWorkers();
 	void						finishedWithCombatWorkers();
 
 	void						drawResourceDebugInfo();
@@ -44,6 +45,7 @@ public:
 	void						setScoutWorker(BWAPI::Unit * worker);
 
 	bool						isWorkerScout(BWAPI::Unit * worker);
+	bool						isWorkerKamikaze(BWAPI::Unit * worker);
 	bool						isFree(BWAPI::Unit * worker);
 	bool						isBuilder(BWAPI::Unit * worker);
 

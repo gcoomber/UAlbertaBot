@@ -24,6 +24,9 @@ void WorkerManager::update()
 	// handle combat workers
 	handleCombatWorkers();
 
+	// handle Kamikaze workers
+	handleKamikazeWorkers();
+
 	drawResourceDebugInfo();
 	//drawWorkerInformation(450,20);
 
@@ -119,6 +122,36 @@ void WorkerManager::handleCombatWorkers()
 			{
 				smartAttackUnit(worker, target);
 			}
+		}
+	}
+}
+
+void WorkerManager::handleKamikazeWorkers()
+{
+	BOOST_FOREACH(BWAPI::Unit * worker, workerData.getWorkers())
+	{
+		if (workerData.getWorkerJob(worker) == WorkerData::Kamikaze)
+		{
+			BWAPI::Broodwar->drawCircleMap(worker->getPosition().x(), worker->getPosition().y(), 4, BWAPI::Colors::Yellow, true);
+			BWAPI::Unit * target = getClosestEnemyUnit(worker);
+
+			// if we have issued a command to this unit already this frame, ignore this one
+			if (worker->getLastCommandFrame() >= BWAPI::Broodwar->getFrameCount() || worker->isAttackFrame())
+			{
+				return;
+			}
+
+			// get the unit's current command
+			BWAPI::UnitCommand currentCommand(worker->getLastCommand());
+
+			// if we've already told this unit to attack this target, ignore this command
+			if (currentCommand.getType() == BWAPI::UnitCommandTypes::Attack_Unit &&	currentCommand.getTarget() == target)
+			{
+				return;
+			}
+
+			// if nothing prevents it, attack the target
+			worker->attack(target);
 		}
 	}
 }
@@ -507,8 +540,8 @@ void WorkerManager::rebalanceWorkers()
 	// for each worker
 	BOOST_FOREACH (BWAPI::Unit * worker, workerData.getWorkers())
 	{
-		// we only care to rebalance mineral workers
-		if (!workerData.getWorkerJob(worker) == WorkerData::Minerals)
+		// we only care to rebalance mineral workers and idle workers
+		if (!workerData.getWorkerJob(worker) == WorkerData::Minerals && !workerData.getWorkerJob(worker) == WorkerData::Idle)
 		{
 			continue;
 		}
@@ -530,9 +563,9 @@ void WorkerManager::rebalanceWorkers()
 		}
 
 		// if we have an idle worker
-		if (workerData.getWorkerJob(worker) == WorkerData::Idle && workerData.getNumIdleWorkers() > 5)
+		if ((workerData.getWorkerJob(worker) == WorkerData::Idle || workerData.getWorkerJob(worker) == WorkerData::Default) && workerData.getNumIdleWorkers() > 5)
 		{
-			workerData.setWorkerJob(worker, WorkerData::Combat, NULL);
+			workerData.setWorkerJob(worker, WorkerData::Kamikaze, NULL);
 		}
 	}
 }
@@ -630,6 +663,11 @@ bool WorkerManager::isFree(BWAPI::Unit * worker)
 bool WorkerManager::isWorkerScout(BWAPI::Unit * worker)
 {
 	return (workerData.getWorkerJob(worker) == WorkerData::Scout);
+}
+
+bool WorkerManager::isWorkerKamikaze(BWAPI::Unit * worker)
+{
+	return (workerData.getWorkerJob(worker) == WorkerData::Kamikaze);
 }
 
 bool WorkerManager::isBuilder(BWAPI::Unit * worker)
