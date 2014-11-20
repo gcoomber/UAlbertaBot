@@ -74,7 +74,7 @@ public:
 
 	static	StrategyManager &	Instance();
 
-			void				onEnd(const bool isWinner);
+	void						onEnd(const bool isWinner);
 	
 	const	bool				regroup(int numInRadius);
 	const	bool				doAttack(const std::set<BWAPI::Unit *> & freeUnits);

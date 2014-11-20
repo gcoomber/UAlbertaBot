@@ -438,6 +438,8 @@ const MetaPairVector StrategyManager::getProtossDragoonsBuildOrderGoal() const
 	int numCyber =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
 	int numCannon =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 
+	int freeMinerals =			BWAPI::Broodwar->self()->minerals() - BuildingManager::Instance().getReservedMinerals();
+
 	int dragoonsWanted = numDragoons > 0 ? numDragoons + 6 : 2;
 	int gatewayWanted = 3;
 	int probesWanted = numProbes + 6;
@@ -579,6 +581,7 @@ const MetaPairVector StrategyManager::getFastZealotRushBuildOrderGoal() const
 	int numCyber =				BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
 	int numCannon =				BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	int numCitadel =			BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Citadel_of_Adun);
+	int numAssimilator =		BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Assimilator);
 	int legEnhanceLevel =		BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Leg_Enhancements);
 
 	int zealotsWanted = numZealots + 8;
@@ -607,8 +610,11 @@ const MetaPairVector StrategyManager::getFastZealotRushBuildOrderGoal() const
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
 	}
 
+
+
 	if (numCyber > 0)
 	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Assimilator, 1));
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1));
 		dragoonsWanted = numDragoons + 2;
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Singularity_Charge, 1));
