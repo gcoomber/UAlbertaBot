@@ -585,6 +585,16 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 		gatewayWanted = 6;
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Assimilator, 1));
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
+		
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Assimilator) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1));
+			//if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Citadel_of_Adun) > 0)
+			//{
+				goal.push_back(MetaPair(BWAPI::UpgradeTypes::Leg_Enhancements, 1));
+			//}
+		}
+		
 	}
 
 	if (numCyber > 0)
