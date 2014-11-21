@@ -27,7 +27,8 @@ void StrategyManager::addStrategies()
 	zergOpeningBook    = std::vector<std::string>(NumZergStrategies);
 
 	//protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 0 3 0 0 3 0 1 3 0 4 4 4 4 4 1 0 4 4 4";
-    protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
+    //protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
+	protossOpeningBook[ProtossZealotRush] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4";
 	//protossOpeningBook[ProtossZealotRush]	= "0";
 	//protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 3 0 7 5 0 0 12 3 13 0 22 22 22 22 0 1 0";
     protossOpeningBook[ProtossDarkTemplar]	=     "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
@@ -37,7 +38,9 @@ void StrategyManager::addStrategies()
 	//protossOpeningBook[ProtossAir] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 0 1 4 3 0 0 1 7 0 4 0 4 4 4 4 1 5 0 4 4 4 17 4 4 27 4 4 4 28";
 	protossOpeningBook[ProtossAir] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 0 1 4 3 0 0 1 7 0 4 0 4 4 4 4 1 5 0 4 4 4 17 4 4 4 4 4 ";
 	//protossOpeningBook[ProtossUpgrade] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 7 4 4 4 0 0 5 4 4 4 12 4 4 4";
-	protossOpeningBook[ProtossCarrier] = "0 0 0 0 1 0 9 0 10 0 10 0 10 3 1 0 0 10 1 10 0 1 7 10 5 10 0 0 10 17 1 0 27 10 0 1 0 28 10 10 1";
+	//protossOpeningBook[ProtossCarrier] = "0 0 0 0 1 0 9 0 10 0 10 0 10 3 1 0 0 10 1 10 0 1 10 5 10 7 0 0 10 17 0 27 10 10 32 0 1 0 28 10 10 28 1 17 28 28 28 28 ";
+	protossOpeningBook[ProtossCarrier] = "0 0 0 0 1 0 9 0 10 0 10 0 10 3 1 0 0 10 1 10 0 1 10 5 10 7 0 0 10 17 0 27 10 10 32 0 1 0 28 10 10 28 1 17 28 28 28 28 ";
+	protossOpeningBook[ProtossUpgrades] = "0 0 0 0 1 0 9 0 3 0 10 0 1 10 3 0 10 0 0 1 10 3 10 5 7 0 0 10 31 10 3 8 6 1 6 0 3 1 0 6 6 6 0 3 6 6 6 3 6 6 6 ";
 
 	terranOpeningBook[TerranMarineRush]		= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
 	zergOpeningBook[ZergZerglingRush]		= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
@@ -209,6 +212,7 @@ void StrategyManager::setStrategy()
             //currentStrategy = ProtossZealotRush;
 			//currentStrategy = ProtossAir;
 			currentStrategy = ProtossCarrier;
+			//currentStrategy = ProtossZealotRush;
         }
 	}
 
@@ -399,6 +403,34 @@ const bool StrategyManager::expandProtossZealotRush() const
 	return false;
 }
 
+const bool StrategyManager::expandProtossUpgrades() const
+{
+	// if there is no place to expand to, we can't expand
+	if (MapTools::Instance().getNextExpansion() == BWAPI::TilePositions::None)
+	{
+		return false;
+	}
+
+	int numNexus = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numCannons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	int numDragoons = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
+	//int numZealots = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
+	int frame = BWAPI::Broodwar->getFrameCount();
+
+	// if there are more than 10 idle workers, expand
+	if (WorkerManager::Instance().getNumIdleWorkers() > 10)
+	{
+		return true;
+	}
+
+	if ((numNexus < 2) && (numDragoons >= 6 || frame > 9000))
+	{
+		return true;
+	}
+
+	return false;
+}
+
 const bool StrategyManager::expandProtossCarrier() const
 {
 	// if there is no place to expand to, we can't expand
@@ -469,9 +501,9 @@ const MetaPairVector StrategyManager::getBuildOrderGoal()
 		{
 			return getProtossDragoonsBuildOrderGoal();
 		}
-		else if (getCurrentStrategy() == ProtossAir)
+		else if (getCurrentStrategy() == ProtossUpgrades)
 		{
-			return getProtossAirBuildOrderGoal();
+			return getProtossUpgradesBuildOrderGoal();
 		}
 		else if (getCurrentStrategy() == ProtossCarrier)
 		{
@@ -874,6 +906,96 @@ const MetaPairVector StrategyManager::getProtossCarrierBuildOrderGoal() const
 	return goal;
 }
 
+const MetaPairVector StrategyManager::getProtossUpgradesBuildOrderGoal() const
+{
+	// the goal to return
+	MetaPairVector goal;
+
+	int numZealots = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
+	int numDragoons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
+	int numProbes = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
+	int numNexusCompleted = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numNexusAll = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
+	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	int numCarriers = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Carrier);
+	int numScout = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Scout);
+
+	int zealotsWanted = numZealots;
+	int dragoonsWanted = numDragoons + 4;
+	int gatewayWanted = 3;
+	int probesWanted = numProbes + 4;
+
+	int freeMinerals = ProductionManager::Instance().getFreeMinerals();
+	int freeGas = ProductionManager::Instance().getFreeGas();
+
+	// Update the max number of Carriers wanted in build order
+	int maxCarriersWanted = (numNexusCompleted >= 2) ? 10 : 6;
+
+	if (InformationManager::Instance().enemyHasCloakedUnits())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
+
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observatory, 1));
+		}
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Observatory) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
+		}
+	}
+
+	if (numCyber > 0)
+	{
+		//dragoonsWanted = numDragoons + 2;
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Singularity_Charge, 1));
+	}
+
+	if ((numDragoons > 6) && (freeMinerals > 400))
+	{
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Armor, 1));
+	}
+
+	if (numNexusCompleted >= 2)
+	{
+		++gatewayWanted;
+		gatewayWanted = (gatewayWanted < 5) ? gatewayWanted : 5;
+		dragoonsWanted = numDragoons + 4;
+	}
+
+	if (numNexusCompleted >= 3)
+	{
+		gatewayWanted = 8;
+		dragoonsWanted = numDragoons + 6;
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
+	}
+
+	if (numNexusAll > 1)
+	{
+		probesWanted = numProbes + 6;
+	}
+
+	if (freeMinerals > 1000)
+	{
+		gatewayWanted += 2;
+		zealotsWanted += 4;
+	}
+
+
+	if (expandProtossUpgrades())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
+	}
+
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot, zealotsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe, std::min(90, probesWanted)));
+
+	return goal;
+}
+
 const MetaPairVector StrategyManager::getTerranBuildOrderGoal() const
 {
 	// the goal to return
@@ -914,4 +1036,60 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
  const int StrategyManager::getCurrentStrategy()
  {
 	 return currentStrategy;
+ }
+
+// Builds and returns a vector of units/buildings/upgrades according to the current strategy. Used in place
+// of the build order search if the build order search is disabled.
+ std::vector<MetaType> StrategyManager::getCustomBuildOrder()
+ {
+	 // Vector of units/buildings/ugrades to build
+	 std::vector<MetaType> customBuildOrder;
+
+	 switch (currentStrategy)
+	 {
+	 case ProtossCarrier:
+		 customBuildOrder = getCarrierCustomBuildOrder();
+		 break;
+	 default:
+		 break;
+	 }
+
+	 return customBuildOrder;
+ }
+
+ // Builds and returns a vector of units/buildings/upgrades to be built after the opening book for the
+ // ProtossCarrier build
+ std::vector<MetaType> StrategyManager::getCarrierCustomBuildOrder()
+ {
+	 // Vector of units/buildings/ugrades to build
+	 std::vector<MetaType> customBuildOrder;
+
+	 int zealotsWanted = 0;
+
+	 // First build a python if we are low in supply
+	 int totalSupply = BWAPI::Broodwar->self()->supplyTotal();
+	 int supplyAvailable = std::max(0, totalSupply - BWAPI::Broodwar->self()->supplyUsed());
+	 if ((supplyAvailable < 10) && (totalSupply < 200))
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+	 }
+
+	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Carrier);
+	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Carrier);
+
+	 // If we have excess minerals after the carriers are added, use excess minerals on gateways and zealots
+	 int freeMinerals = ProductionManager::Instance().getFreeMinerals() - 600;
+	 if (freeMinerals > 500)
+	 {
+		 if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Gateway) < 2)
+			 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Gateway);
+
+		 zealotsWanted += 4;
+	 }
+
+	 for (int i = 0; i < zealotsWanted; ++i)
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+
+	 return customBuildOrder;
  }

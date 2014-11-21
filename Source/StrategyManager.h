@@ -59,6 +59,9 @@ class StrategyManager
 	const	bool				expandProtossCarrier() const;
 	const	MetaPairVector		getProtossCarrierBuildOrderGoal() const;
 
+	const	bool				expandProtossUpgrades() const;
+	const	MetaPairVector		getProtossUpgradesBuildOrderGoal() const;
+
 	const	MetaPairVector		getProtossAirBuildOrderGoal() const;
 
 	const	MetaPairVector		getTerranBuildOrderGoal() const;
@@ -70,7 +73,7 @@ class StrategyManager
 
 public:
 
-	enum { ProtossZealotRush=0, ProtossDarkTemplar=1, ProtossDragoons=2, ProtossAir=3, ProtossCarrier=4, NumProtossStrategies=5 };
+	enum ProtossStrategy { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossAir = 3, ProtossCarrier = 4, ProtossUpgrades = 5, NumProtossStrategies = 6 };
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 
@@ -87,4 +90,7 @@ public:
 
 	const	MetaPairVector		getBuildOrderGoal();
 	const	std::string			getOpeningBook() const;
+
+	std::vector<MetaType>		getCustomBuildOrder();
+	std::vector<MetaType>		getCarrierCustomBuildOrder();
 };

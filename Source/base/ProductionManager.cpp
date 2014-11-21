@@ -41,7 +41,20 @@ void ProductionManager::setBuildOrder(const std::vector<MetaType> & buildOrder)
 
 void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<MetaType, UnitCountType> > & goal)
 {	
-	std::vector<MetaType> buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
+	std::vector<MetaType> buildOrder;
+	
+	if (useBuildOrderSearch())
+	{
+		buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
+	}
+	else
+	{
+		// If build order search is disabled, get the custom build order for the current strategy
+		buildOrder = StrategyManager::Instance().getCustomBuildOrder();
+	}
+	
+
+
 
 	// set the build order
 	setBuildOrder(buildOrder);
@@ -519,4 +532,14 @@ ProductionManager & ProductionManager::Instance() {
 void ProductionManager::onGameEnd()
 {
 	buildLearner.onGameEnd();
+}
+
+// Returns true if the build order search should be used to set the build order.
+bool ProductionManager::useBuildOrderSearch()
+{
+	// For ProtossCarrier build, disable the build order search for stability, as we enter mid game
+	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrier)
+		return false;
+
+	return true;
 }
