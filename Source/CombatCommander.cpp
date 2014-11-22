@@ -26,7 +26,10 @@ void CombatCommander::update(std::set<BWAPI::Unit *> unitsToAssign)
         
 		// Assign defense and attack squads
         assignScoutDefenseSquads();
-		assignDefenseSquads(unitsToAssign);
+		// Do not assign defence squads for ProtossCannonTurtle strategy
+		if (StrategyManager::Instance().getCurrentStrategy() != StrategyManager::ProtossCannonTurtle) {
+			assignDefenseSquads(unitsToAssign);
+		}
 		assignAttackSquads(unitsToAssign);
 		assignIdleSquads(unitsToAssign);
 	}
