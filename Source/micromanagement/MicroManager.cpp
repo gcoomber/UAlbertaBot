@@ -37,7 +37,7 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	{
 		//MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
 		// Defender units have a smaller radius to stay close to make cannons useful
-		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 600, false, true);
+		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 450, false, true);
 	
 	} // otherwise we want to see everything on the way
 	else if (order.type == order.Attack) 
