@@ -25,7 +25,7 @@ void CombatCommander::update(std::set<BWAPI::Unit *> unitsToAssign)
 		WorkerManager::Instance().finishedWithCombatWorkers();
         
 		// Assign defense and attack squads
-        assignScoutDefenseSquads();
+		assignScoutDefenseSquads();	
 		assignDefenseSquads(unitsToAssign);
 		assignAttackSquads(unitsToAssign);
 		assignIdleSquads(unitsToAssign);
@@ -114,6 +114,12 @@ void CombatCommander::assignScoutDefenseSquads()
         // special case: figure out if the only attacker is a worker, the enemy is scouting
         if (enemyUnitsInRegion.size() == 1 && (*enemyUnitsInRegion.begin())->getType().isWorker())
         {
+			static int firstScoutFrame = BWAPI::Broodwar->getFrameCount();
+			int getNowFrame = BWAPI::Broodwar->getFrameCount();
+
+			if (getNowFrame - firstScoutFrame < 200)
+				return;
+
             // the enemy worker that is attacking us
             BWAPI::Unit * enemyWorker       = *enemyUnitsInRegion.begin();
 

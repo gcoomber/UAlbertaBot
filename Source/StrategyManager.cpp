@@ -589,10 +589,7 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Assimilator) > 0)
 		{
 			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1));
-			//if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Citadel_of_Adun) > 0)
-			//{
-				goal.push_back(MetaPair(BWAPI::UpgradeTypes::Leg_Enhancements, 1));
-			//}
+			goal.push_back(MetaPair(BWAPI::UpgradeTypes::Leg_Enhancements, 1));
 		}
 		
 	}
@@ -668,4 +665,132 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
  const int StrategyManager::getCurrentStrategy()
  {
 	 return currentStrategy;
+ }
+
+
+ std::vector<MetaType> StrategyManager::getCustomBuildOrderGoal()
+ {
+	 std::vector<MetaType> customBuildOrder;
+
+	 int supplyAvailable = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
+	 // Add as many zealots as possible (up to 4)
+	 for (int i = 0; (i < 4) && (supplyAvailable > BWAPI::UnitTypes::Protoss_Zealot.supplyRequired()); ++i)
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+		 supplyAvailable -= BWAPI::UnitTypes::Protoss_Zealot.supplyRequired();
+	 }
+
+	 // Add 2 probes if possible
+	 if (supplyAvailable >= 2 * BWAPI::UnitTypes::Protoss_Probe.supplyRequired())
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Probe);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Probe);
+	 }
+
+	 // if we have a completed cybernetics core
+	 if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core) > 0)
+	 {
+		 // make sure singularity charge is upgraded or upgrading
+		 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge) > 0
+			 || BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Singularity_Charge))
+		 {
+			 // add two dragoons if possible
+			 if (supplyAvailable >= 2 * BWAPI::UnitTypes::Protoss_Dragoon.supplyRequired())
+			 {
+				 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Dragoon);
+				 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Dragoon);
+			 }
+		 }
+		 // we need singularity charge
+		 else
+		 {
+			 customBuildOrder.push_back(BWAPI::UpgradeTypes::Singularity_Charge);
+		 }
+	 }
+
+	 // if we have a forge
+	 if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge) > 0)
+	 {
+		 // if we are not upgrading weapons already
+		 if (!BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Ground_Weapons))
+		 {
+			 // if we have not maxed out the weapons upgrade
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons)
+				 < BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons))
+			 {
+				 // if we have the level 1 weapons upgrade
+				 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) <= 1
+					 && (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Templar_Archives) == 0))
+				 {
+					 // add the templar archives
+					 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Templar_Archives);
+				 }
+				 // get the next weapons upgrade level
+				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Weapons);
+			 }
+		 }
+		 // if we only have 1 forge
+		 if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge) == 1)
+		 {
+			 // build another forge
+			 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Forge);
+		 }
+		 // if armour is not upgrading and we have more than 1 forge
+		 if (!BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
+			 && BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Forge) > 1)
+		 {
+			 // if the armour upgrade is not max level
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
+				 < BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor))
+			 {
+				 // get the armour upgrade
+				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Armor);
+			 }
+		 }
+		 // if we ended up with more than 2 forges
+		 if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Forge) > 2)
+		 {
+			 // if plasma shields are not max level
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
+			 {		
+				 // upgrade plasma shields
+				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Plasma_Shields);
+			 }
+		 }
+		 // if we have only 2 forges and have maxed out either weapons or armour
+		 else if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor) == BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
+			 || BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) == BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons))
+		 {
+			 // if plasma shields are not max level
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
+			 {
+				 // upgrade plasma shields
+				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Plasma_Shields);
+			 }
+		 }
+	 }
+	 // we have no forges
+	 else
+	 {
+		 // add a forge and get it to research weapons
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Forge);
+		 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Weapons);
+	 }
+
+	 // if we need more supply and have not reached the maximum supply
+	 if (supplyAvailable < 20 && BWAPI::Broodwar->self()->supplyTotal() < 200)
+	 {
+		 // build 2 more pylons
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+	 }
+
+	 // Add as many zealots as possible (up to 4)
+	 for (int i = 0; (i < 4) && (supplyAvailable > BWAPI::UnitTypes::Protoss_Zealot.supplyRequired()); ++i)
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+		 supplyAvailable -= BWAPI::UnitTypes::Protoss_Zealot.supplyRequired();
+	 }
+
+	 return customBuildOrder;
  }

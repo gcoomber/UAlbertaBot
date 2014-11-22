@@ -41,7 +41,17 @@ void ProductionManager::setBuildOrder(const std::vector<MetaType> & buildOrder)
 
 void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<MetaType, UnitCountType> > & goal)
 {	
-	std::vector<MetaType> buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
+	std::vector<MetaType> buildOrder;
+	
+	if (useBuildOrderSearch())
+	{
+		buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
+	}
+	else
+	{
+		// If build order search is disabled, get the custom build order for the current strategy
+		buildOrder = StrategyManager::Instance().getCustomBuildOrderGoal();
+	}
 
 	// set the build order
 	setBuildOrder(buildOrder);
@@ -176,7 +186,6 @@ void ProductionManager::manageBuildOrderQueue()
 		// if we can make the current item
 		if (producer && canMake) 
 		{
-			// create it
 			createMetaType(producer, currentItem.metaType);
 			assignedWorkerForThisBuilding = false;
 			haveLocationForThisBuilding = false;
@@ -425,9 +434,17 @@ BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool lea
 				}
 			}
 		}
+	// if it is a forge we are worried about upgrade time not training time
+	} else if (type == BWAPI::UnitTypes::Protoss_Forge) {
+		BOOST_FOREACH(BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits()) {
 
-		// if it is a building and we are worried about selecting the unit with the least
-		// amount of training time remaining
+			if (u->getType() == type && u->isCompleted() && !u->isUpgrading() && !u->isLifted() && !u->isUnpowered()) {
+
+				return u;
+			}
+		}
+	// if it is a building and we are worried about selecting the unit with the least
+	// amount of training time remaining
 	} else if (type.isBuilding() && leastTrainingTimeRemaining) {
 
 		BOOST_FOREACH (BWAPI::Unit * u, BWAPI::Broodwar->self()->getUnits()) {
@@ -519,4 +536,15 @@ ProductionManager & ProductionManager::Instance() {
 void ProductionManager::onGameEnd()
 {
 	buildLearner.onGameEnd();
+}
+
+bool ProductionManager::useBuildOrderSearch()
+{
+	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Citadel_of_Adun) > 0
+		&& StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossZealotRush)
+	{
+		return false;
+	}
+	else
+		return true;
 }
