@@ -750,8 +750,9 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 		 // if we ended up with more than 2 forges
 		 if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Forge) > 2)
 		 {
-			 // if plasma shields are not max level
-			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
+			 // if plasma shields are not max level and not upgrading
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields)
+				 && !BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
 			 {		
 				 // upgrade plasma shields
 				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Plasma_Shields);
@@ -761,8 +762,9 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 		 else if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor) == BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
 			 || BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) == BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons))
 		 {
-			 // if plasma shields are not max level
-			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
+			 // if plasma shields are not max level and not upgrading
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields)
+				 && !BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
 			 {
 				 // upgrade plasma shields
 				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Plasma_Shields);
