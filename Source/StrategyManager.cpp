@@ -725,8 +725,13 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 					 // add the templar archives
 					 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Templar_Archives);
 				 }
-				 // get the next weapons upgrade level
-				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Weapons);
+				 // if we have level 0 or level 1+ and a templar archive
+				 if ((BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Templar_Archives) > 0)
+					 || (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) == 0))
+				 {
+					 // get the next weapons upgrade level
+					 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Weapons);
+				 }
 			 }
 		 }
 		 // if we only have 1 forge
@@ -743,8 +748,13 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
 				 < BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor))
 			 {
-				 // get the armour upgrade
-				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Armor);
+				 // if we have level 0 or level 1+ and a templar archive
+				 if ((BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Templar_Archives) > 0)
+					 || (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor) == 0))
+				 {
+					 // get the armour upgrade
+					 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Armor);
+				 }
 			 }
 		 }
 		 // if we ended up with more than 2 forges
