@@ -27,7 +27,7 @@ void StrategyManager::addStrategies()
 
 	//protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 0 3 0 0 3 0 1 3 0 4 4 4 4 4 1 0 4 4 4";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
-	protossOpeningBook[ProtossCannonTurtle] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 4 9 0 10 10";
+	protossOpeningBook[ProtossCannonTurtle] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 1 4 9 0 10 10 10";
 	//protossOpeningBook[ProtossZealotRush]	= "0";
 	//protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 3 0 7 5 0 0 12 3 13 0 22 22 22 22 0 1 0";
     protossOpeningBook[ProtossDarkTemplar]	=     "0 0 0 0 1 0 3 0 7 0 5 0 12 0 13 3 22 22 1 22 22 0 1 0";
@@ -319,20 +319,21 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 {
 	int ourForceSize = (int)freeUnits.size();
 	int numUnitsNeededForAttack;
-	//int enemyForceSize = InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Zealot, BWAPI::Broodwar->enemy()) + InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Dragoon, BWAPI::Broodwar->enemy());
+	int enemyForceSize = InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Zealot, BWAPI::Broodwar->enemy()) + 
+		InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Dragoon, BWAPI::Broodwar->enemy());
 
 	 //If using ProtossCannonTurtle strategy, don't rush
-	if (currentStrategy == ProtossCannonTurtle) {
-		numUnitsNeededForAttack = 20;
-	}
-	else {
-		numUnitsNeededForAttack = 1;
-	}
+	//if (currentStrategy == ProtossCannonTurtle) {
+	//	numUnitsNeededForAttack = 200;
+	//}
+	//else {
+	//	numUnitsNeededForAttack = 1;
+	//}
 
-	bool doAttack  = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
-					|| ourForceSize >= numUnitsNeededForAttack;
+	//bool doAttack  = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
+	//				|| ourForceSize >= numUnitsNeededForAttack;
 
-	//bool doAttack = ((ourForceSize - enemyForceSize) >= 10) && ourForceSize >= 20;
+	bool doAttack = ((ourForceSize - enemyForceSize) >= 20); //&& ourForceSize >= 20;
 
 	if (doAttack)
 	{
@@ -711,10 +712,10 @@ const MetaPairVector StrategyManager::getProtossCannonTurtleBuildOrderGoal() con
 		probesWanted = numProbes + 3;
 	}
 
-	if (expandProtossZealotRush())
-	{
-		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
-	}
+	//if (expandProtossZealotRush())
+	//{
+	//	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
+	//}
 
 
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));
