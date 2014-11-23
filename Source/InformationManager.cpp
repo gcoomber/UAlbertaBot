@@ -9,6 +9,7 @@ InformationManager::InformationManager()
 	: goForIt(false)
 	, map(BWAPI::Broodwar)
 	, lastFrameRegroup(false)
+	, attacking(false)
 {
 	initializeRegionInformation();
 }

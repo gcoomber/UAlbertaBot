@@ -327,6 +327,7 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 
 		if (enemyForceSize != -1) {
 			doAttack = ((ourForceSize - enemyForceSize) >= 20); //&& ourForceSize >= 20;
+			InformationManager::Instance().attacking = doAttack;
 		}
 		// Could not get enemy force size
 		else {
@@ -399,6 +400,60 @@ const bool StrategyManager::expandProtossZealotRush() const
 		return true;
 	}
 
+	return false;
+}
+
+const bool StrategyManager::expandProtossCannonTurtle() const
+{
+	// if there is no place to expand to, we can't expand
+	if (MapTools::Instance().getNextExpansion() == BWAPI::TilePositions::None)
+	{
+		return false;
+	}
+
+	int numNexus = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numZealots = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
+	int frame = BWAPI::Broodwar->getFrameCount();
+	bool attack = InformationManager::Instance().attacking;
+
+	if (attack) {
+		// if there are more than 10 idle workers, expand
+		if (WorkerManager::Instance().getNumIdleWorkers() > 10)
+		{
+			return true;
+		}
+
+		// 2nd Nexus Conditions:
+		//		We have 12 or more zealots
+		//		It is past frame 7000
+		if ((numNexus < 2) && (numZealots > 12 || frame > 9000))
+		{
+			return true;
+		}
+
+		// 3nd Nexus Conditions:
+		//		We have 24 or more zealots
+		//		It is past frame 12000
+		if ((numNexus < 3) && (numZealots > 24 || frame > 15000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 4) && (numZealots > 24 || frame > 21000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 5) && (numZealots > 24 || frame > 26000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 6) && (numZealots > 24 || frame > 30000))
+		{
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -719,10 +774,10 @@ const MetaPairVector StrategyManager::getProtossCannonTurtleBuildOrderGoal() con
 		probesWanted = numProbes + 3;
 	}
 
-	//if (expandProtossZealotRush())
-	//{
-	//	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
-	//}
+	if (expandProtossCannonTurtle())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
+	}
 
 
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));

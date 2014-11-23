@@ -40,6 +40,7 @@ class InformationManager {
 public:
 
 	bool goForIt;
+	bool attacking;
 	int lastFrameRegroup;
 
 	// yay for singletons!
