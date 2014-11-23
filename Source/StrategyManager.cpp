@@ -331,9 +331,16 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 	// Don't rush with ProtossCannonTurtle strategy
 	if (currentStrategy == ProtossCannonTurtle) {
 		int enemyForceSize = InformationManager::Instance().numEnemyCombatUnits(BWAPI::Broodwar->enemy());
+		int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+		int frame = BWAPI::Broodwar->getFrameCount();
 
-		if (enemyForceSize != -1) {
-			doAttack = ((ourForceSize - enemyForceSize) >= 20); //&& ourForceSize >= 20;
+		// If we are beyond early game and our cannons have been destroyed, attack
+		if (frame > 10000 && numCannon == 0) {
+			doAttack = true;
+		}
+		// If our force size is significantly greater than theirs, attack
+		else if (enemyForceSize != -1) {
+			doAttack = ((ourForceSize - enemyForceSize) >= 20);
 			InformationManager::Instance().attacking = doAttack;
 		}
 		// Could not get enemy force size
