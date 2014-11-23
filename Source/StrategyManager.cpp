@@ -128,6 +128,10 @@ void StrategyManager::readResults()
 		results[ProtossDragoons].first = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossDragoons].second = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossCannonTurtle].first = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossCannonTurtle].second = atoi(line.c_str());
 		f_in.close();
 	}
 
@@ -146,6 +150,9 @@ void StrategyManager::writeResults()
 	f_out << results[ProtossDarkTemplar].second << "\n";
 	f_out << results[ProtossDragoons].first     << "\n";
 	f_out << results[ProtossDragoons].second    << "\n";
+	f_out << results[ProtossCannonTurtle].first << "\n";
+	f_out << results[ProtossCannonTurtle].second << "\n";
+	
 
 	f_out.close();
 }
