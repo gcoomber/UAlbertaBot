@@ -726,6 +726,7 @@ const MetaPairVector StrategyManager::getProtossCannonTurtleBuildOrderGoal() con
 	int probesWanted = numProbes + 4;
 	int cannonsWanted = numCannon + 3;
 
+	// Cloaked unit check
 	if (InformationManager::Instance().enemyHasCloakedUnits())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
@@ -740,53 +741,50 @@ const MetaPairVector StrategyManager::getProtossCannonTurtleBuildOrderGoal() con
 		}
 	}
 
-	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge) >= 1 && BWAPI::Broodwar->getFrameCount() > 5000) {
+	// Build assimilator when forge is built
+	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge)) {
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Assimilator, 1));
 	}
 
-	if (numNexusAll >= 2 || BWAPI::Broodwar->getFrameCount() > 10000)
+	// Start pumping out zealots in prep for attack 
+	if (BWAPI::Broodwar->getFrameCount() > 10000)
 	{
-		gatewayWanted = 4;
+		gatewayWanted = 5;
+		zealotsWanted = numZealots + 10;
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
+	}
+
+	// Build Cyber Core for Dragoon support late game
+	if (BWAPI::Broodwar->getFrameCount() > 15000) {
+		gatewayWanted = 6;
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
 	}
 
-	if (numNexusCompleted >= 2 || BWAPI::Broodwar->getFrameCount() > 12000) { // was numNexusAll
-		gatewayWanted = 6;
-		dragoonsWanted = numDragoons + 8;
-	}
-
-	if (numCannon >= 11) {
+	// Slow down on cannon production late game
+	if (numCannon >= 12) {
 		cannonsWanted = numCannon + 1;
 	}
 
+	// Dragoon production
 	if (numCyber > 0)
 	{
 		dragoonsWanted = numDragoons + 4;
-		int zealotsWanted = numZealots + 2;
+		zealotsWanted = numZealots + 6;
 	}
 
-	if (numDragoons > 15) {
-		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Singularity_Charge, 1));
-	}
-
+	// Get some observers if we've expanded
 	if (numNexusCompleted >= 3)
 	{
-		gatewayWanted = 8;
-		//dragoonsWanted = numDragoons + 6;
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
 	}
 
-	if (numNexusAll > 1)
-	{
-		probesWanted = numProbes + 3;
-	}
-
+	// Expansion condition
 	if (expandProtossCannonTurtle())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
 
-
+	// Build order goal requirements
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot, zealotsWanted));
