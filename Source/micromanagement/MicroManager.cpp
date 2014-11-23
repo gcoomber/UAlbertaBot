@@ -37,8 +37,8 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	{
 		//MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
 		// Defender units have a smaller radius to stay close to make cannons useful
-		if (BWAPI::Broodwar->getFrameCount() < 11000) {
-			MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 600, false, true);
+		if (BWAPI::Broodwar->getFrameCount() < 10000) {
+			MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 700, false, true);
 		}
 		else {
 			MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 300, false, true);

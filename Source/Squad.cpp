@@ -157,7 +157,9 @@ bool Squad::needsToRegroup()
 		return false;
 	}
 
-	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle) {
+	// If doing CannonTurtule strat and haven't lost our main attack, blitz
+	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle) &&
+		BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Zealot) < 30) {
 		return false;
 	}
 
