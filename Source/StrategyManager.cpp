@@ -726,6 +726,7 @@ const MetaPairVector StrategyManager::getProtossCannonTurtleBuildOrderGoal() con
 	int numNexusAll = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
 	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
 	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	int numAssimilator = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Assimilator);
 
 	int zealotsWanted = numZealots + 8;
 	int dragoonsWanted = numDragoons;
@@ -758,11 +759,11 @@ const MetaPairVector StrategyManager::getProtossCannonTurtleBuildOrderGoal() con
 	{
 		gatewayWanted = 5;
 		zealotsWanted = numZealots + 10;
-		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
+		//goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
 	}
 
 	// Build Cyber Core for Dragoon support late game
-	if (BWAPI::Broodwar->getFrameCount() > 15000) {
+	if ((BWAPI::Broodwar->getFrameCount() > 15000) && (numAssimilator >= 1)) {
 		gatewayWanted = 6;
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
 	}
@@ -776,7 +777,7 @@ const MetaPairVector StrategyManager::getProtossCannonTurtleBuildOrderGoal() con
 	if (numCyber > 0)
 	{
 		dragoonsWanted = numDragoons + 4;
-		zealotsWanted = numZealots + 6;
+		zealotsWanted = numZealots + 8;
 	}
 
 	// Get some observers if we've expanded

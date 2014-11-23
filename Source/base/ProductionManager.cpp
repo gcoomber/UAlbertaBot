@@ -120,10 +120,19 @@ void ProductionManager::onUnitDestroy(BWAPI::Unit * unit)
 		
 	if (Options::Modules::USING_MACRO_SEARCH)
 	{
-		// Do not get a new build order when a probe dies or a cannon is destroyed during the ProtossCannonTurtle strategy
+		// If using ProtossCannonTurtle strategy
 		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle) {
-			if ((unit->getType().isBuilding()) && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon)) {
-				BWAPI::Broodwar->printf("Critical building destroyed, re-searching build order");
+			// If enemy does not have cloaked units, ignore death of probes and cannons
+			if (!InformationManager::Instance().enemyHasCloakedUnits()){
+				if ((unit->getType().isBuilding()) && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon)) {
+					BWAPI::Broodwar->printf("Critical building destroyed, re-searching build order");
+					performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+				}
+			}
+			// If enemy does have cloaked units, do not ignore death of probes
+			else if ((unit->getType().isWorker() && !WorkerManager::Instance().isWorkerScout(unit)) || 
+				(unit->getType().isBuilding() && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon))) {
+				BWAPI::Broodwar->printf("Critical unit died, re-searching build order");
 				performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
 			}
 		}
