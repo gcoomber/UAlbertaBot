@@ -451,3 +451,56 @@ bool InformationManager::tileContainsUnit(BWAPI::TilePosition tile)
 {
 	return map.canBuildHere(tile);
 }
+
+/* Returns the number of visible enemy combat units */
+int InformationManager::numEnemyCombatUnits(BWAPI::Player * player)
+{
+	BWAPI::Race enemyRace;
+	int enemyCount;
+
+	enemyRace = player->getRace();
+
+	if (enemyRace == BWAPI::Races::Protoss) {
+		enemyCount = InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Zealot, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Dragoon, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Arbiter, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Archon, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Carrier, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Corsair, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Dark_Archon, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Dark_Templar, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_High_Templar, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Reaver, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Protoss_Scout, player);
+	}
+	else if (enemyRace == BWAPI::Races::Terran) {
+		enemyCount = this->getNumUnits(BWAPI::UnitTypes::Terran_Battlecruiser, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Firebat, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Ghost, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Goliath, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Marine, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Medic, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Science_Vessel, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Siege_Tank_Siege_Mode, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Siege_Tank_Tank_Mode, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Valkyrie, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Vulture, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Terran_Wraith, player);
+	}
+	else if (enemyRace == BWAPI::Races::Zerg) {
+		enemyCount = this->getNumUnits(BWAPI::UnitTypes::Zerg_Defiler, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Devourer, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Guardian, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Hydralisk, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Lurker, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Mutalisk, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Queen, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Ultralisk, player);
+		enemyCount += this->getNumUnits(BWAPI::UnitTypes::Zerg_Zergling, player);
+	}
+	// Haven't seen the enemy yet and don't know their race
+	else {
+		return -1;
+	}
+	return enemyCount;
+}

@@ -319,21 +319,28 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 {
 	int ourForceSize = (int)freeUnits.size();
 	int numUnitsNeededForAttack;
-	int enemyForceSize = InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Zealot, BWAPI::Broodwar->enemy()) + 
-		InformationManager::Instance().getNumUnits(BWAPI::UnitTypes::Protoss_Dragoon, BWAPI::Broodwar->enemy());
+	bool doAttack = false;
 
-	 //If using ProtossCannonTurtle strategy, don't rush
-	//if (currentStrategy == ProtossCannonTurtle) {
-	//	numUnitsNeededForAttack = 200;
-	//}
-	//else {
-	//	numUnitsNeededForAttack = 1;
-	//}
+	// Don't rush with ProtossCannonTurtle strategy
+	if (currentStrategy == ProtossCannonTurtle) {
+		int enemyForceSize = InformationManager::Instance().numEnemyCombatUnits(BWAPI::Broodwar->enemy());
 
-	//bool doAttack  = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
-	//				|| ourForceSize >= numUnitsNeededForAttack;
+		if (enemyForceSize != -1) {
+			doAttack = ((ourForceSize - enemyForceSize) >= 20); //&& ourForceSize >= 20;
+		}
+		// Could not get enemy force size
+		else {
+			doAttack = false;
+		}
 
-	bool doAttack = ((ourForceSize - enemyForceSize) >= 20); //&& ourForceSize >= 20;
+	}
+	// Rush with other strategies
+	else {
+		numUnitsNeededForAttack = 1;
+		doAttack  = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
+						|| ourForceSize >= numUnitsNeededForAttack;
+	}
+	
 
 	if (doAttack)
 	{
