@@ -34,7 +34,7 @@ void StrategyManager::addStrategies()
 	protossOpeningBook[ProtossDragoons]		= "0 0 0 0 1 0 0 3 0 7 0 0 5 0 0 3 8 6 1 6 6 0 3 1 0 6 6 6";
 	//protossOpeningBook[ProtossCarrier] = "0 0 0 0 1 0 9 0 10 0 10 0 10 3 1 0 0 10 1 10 0 1 10 5 10 7 0 0 10 17 0 27 10 10 32 0 1 0 28 10 10 28 1 17 28 28 28 28 ";
 	protossOpeningBook[ProtossCarrier] = "0 0 0 0 1 0 9 0 10 0 10 0 10 3 1 0 0 10 1 10 0 1 10 5 10 7 0 0 10 17 0 27 10 10 32 0 1 0 28 10 10 28 1 17 28 28 28 28 ";
-	protossOpeningBook[ProtossCarrierTurtle] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
+	protossOpeningBook[ProtossCarrierTurtle] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 1 4 9 0 10 10 10";
 
 	terranOpeningBook[TerranMarineRush]		= "0 0 0 0 0 1 0 0 3 0 0 3 0 1 0 4 0 0 0 6";
 	zergOpeningBook[ZergZerglingRush]		= "0 0 0 0 0 1 0 0 0 2 3 5 0 0 0 0 0 0 1 6";
@@ -322,11 +322,29 @@ const int StrategyManager::defendWithWorkers()
 const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 {
 	int ourForceSize = (int)freeUnits.size();
+	int numUnitsNeededForAttack;
+	bool doAttack = false;
 
-	int numUnitsNeededForAttack = 1;
+	// Don't rush with ProtossCannonTurtle strategy
+	if (currentStrategy == ProtossCarrierTurtle) {
+		int enemyForceSize = InformationManager::Instance().numEnemyCombatUnits(BWAPI::Broodwar->enemy());
 
-	bool doAttack  = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
-					|| ourForceSize >= numUnitsNeededForAttack;
+		if (enemyForceSize != -1) {
+			doAttack = ((ourForceSize - enemyForceSize) >= 10); //&& ourForceSize >= 20;
+			InformationManager::Instance().setIsAttacking(doAttack);
+		}
+		// Could not get enemy force size
+		else {
+			doAttack = false;
+		}
+
+	}
+	// Rush with other strategies
+	else {
+		numUnitsNeededForAttack = 1;
+		doAttack = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) >= 1
+			|| ourForceSize >= numUnitsNeededForAttack;
+	}
 
 	if (doAttack)
 	{
@@ -399,44 +417,46 @@ const bool StrategyManager::expandProtossCarrierTurtle() const
 	int numNexus = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
 	int numZealots = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
 	int frame = BWAPI::Broodwar->getFrameCount();
+	bool attack = InformationManager::Instance().getIsAttacking();
 
-	// if there are more than 10 idle workers, expand
-	if (WorkerManager::Instance().getNumIdleWorkers() > 10)
-	{
-		return true;
+	if (attack) {
+		// if there are more than 10 idle workers, expand
+		if (WorkerManager::Instance().getNumIdleWorkers() > 10)
+		{
+			return true;
+		}
+
+		// 2nd Nexus Conditions:
+		//		We have 12 or more zealots
+		//		It is past frame 7000
+		if ((numNexus < 2) && (numZealots > 12 || frame > 9000))
+		{
+			return true;
+		}
+
+		// 3nd Nexus Conditions:
+		//		We have 24 or more zealots
+		//		It is past frame 12000
+		if ((numNexus < 3) && (numZealots > 24 || frame > 15000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 4) && (numZealots > 24 || frame > 21000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 5) && (numZealots > 24 || frame > 26000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 6) && (numZealots > 24 || frame > 30000))
+		{
+			return true;
+		}
 	}
-
-	// 2nd Nexus Conditions:
-	//		We have 12 or more zealots
-	//		It is past frame 7000
-	if ((numNexus < 2) && (numZealots > 12 || frame > 9000))
-	{
-		return true;
-	}
-
-	// 3nd Nexus Conditions:
-	//		We have 24 or more zealots
-	//		It is past frame 12000
-	if ((numNexus < 3) && (numZealots > 24 || frame > 15000))
-	{
-		return true;
-	}
-
-	if ((numNexus < 4) && (numZealots > 24 || frame > 21000))
-	{
-		return true;
-	}
-
-	if ((numNexus < 5) && (numZealots > 24 || frame > 26000))
-	{
-		return true;
-	}
-
-	if ((numNexus < 6) && (numZealots > 24 || frame > 30000))
-	{
-		return true;
-	}
-
 	return false;
 }
 
@@ -843,7 +863,9 @@ const MetaPairVector StrategyManager::getProtossCarrierTurtleBuildOrderGoal() co
 	int dragoonsWanted = numDragoons;
 	int gatewayWanted = 3;
 	int probesWanted = numProbes + 4;
+	int cannonsWanted = numCannon + 3;
 
+	// Cloaked unit check
 	if (InformationManager::Instance().enemyHasCloakedUnits())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
@@ -858,36 +880,51 @@ const MetaPairVector StrategyManager::getProtossCarrierTurtleBuildOrderGoal() co
 		}
 	}
 
-	if (numNexusAll >= 2 || BWAPI::Broodwar->getFrameCount() > 9000)
-	{
-		gatewayWanted = 6;
+	// Build assimilator when forge is built
+	if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge)) {
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Assimilator, 1));
+	}
+
+	// Start pumping out zealots in prep for attack 
+	if (BWAPI::Broodwar->getFrameCount() > 10000)
+	{
+		gatewayWanted = 5;
+		zealotsWanted = numZealots + 10;
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
+	}
+
+	// Build Cyber Core for Dragoon support late game
+	if (BWAPI::Broodwar->getFrameCount() > 15000) {
+		gatewayWanted = 6;
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
 	}
 
-	if (numCyber > 0)
-	{
-		dragoonsWanted = numDragoons + 2;
-		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Singularity_Charge, 1));
+	// Slow down on cannon production late game
+	if (numCannon >= 12) {
+		cannonsWanted = numCannon + 1;
 	}
 
+	// Dragoon production
+	if (numCyber > 0)
+	{
+		dragoonsWanted = numDragoons + 4;
+		zealotsWanted = numZealots + 6;
+	}
+
+	// Get some observers if we've expanded
 	if (numNexusCompleted >= 3)
 	{
-		gatewayWanted = 8;
-		dragoonsWanted = numDragoons + 6;
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
 	}
 
-	if (numNexusAll > 1)
-	{
-		probesWanted = numProbes + 6;
-	}
-
+	// Expansion condition
 	if (expandProtossCarrierTurtle())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
 
+	// Build order goal requirements
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot, zealotsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));

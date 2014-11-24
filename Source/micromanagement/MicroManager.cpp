@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "MicroManager.h"
+#include "StrategyManager.h"
 
 void MicroManager::setUnits(const UnitVector & u) 
 { 
@@ -35,8 +36,18 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	// if the order is to defend, we only care about units in the radius of the defense
 	if (order.type == order.Defend)
 	{
-		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
-	
+		int defendRadius = 0;
+		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle)
+		{
+			// Defender units have smaller radius for turtule strategies to stay close to make cannons useful
+			defendRadius = 600;
+		}
+		else
+		{
+			defendRadius = 800;
+		}
+		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, defendRadius, false, true);
+
 	} // otherwise we want to see everything on the way
 	else if (order.type == order.Attack) 
 	{
