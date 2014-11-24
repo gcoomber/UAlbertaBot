@@ -858,12 +858,22 @@ const MetaPairVector StrategyManager::getProtossCarrierTurtleBuildOrderGoal() co
 	int numNexusAll = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
 	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
 	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	int numStargate = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Stargate);
 
 	int zealotsWanted = numZealots + 8;
 	int dragoonsWanted = numDragoons;
 	int gatewayWanted = 3;
 	int probesWanted = numProbes + 4;
-	int cannonsWanted = numCannon + 3;
+	int cannonsWanted = numCannon;
+
+	// Check if the bot is currently attacking
+	bool attack = InformationManager::Instance().getIsAttacking();
+
+	int freeMinerals = ProductionManager::Instance().getFreeMinerals();
+	int freeGas = ProductionManager::Instance().getFreeGas();
+
+	// Set the max probes wanted given the number of nexuses
+	int maxProbes = getMaxProbeCount();
 
 	// Cloaked unit check
 	if (InformationManager::Instance().enemyHasCloakedUnits())
@@ -886,29 +896,43 @@ const MetaPairVector StrategyManager::getProtossCarrierTurtleBuildOrderGoal() co
 	}
 
 	// Start pumping out zealots in prep for attack 
-	if (BWAPI::Broodwar->getFrameCount() > 10000)
+	/*if (BWAPI::Broodwar->getFrameCount() > 10000)
 	{
 		gatewayWanted = 5;
 		zealotsWanted = numZealots + 10;
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
-	}
+	}*/
 
-	// Build Cyber Core for Dragoon support late game
-	if (BWAPI::Broodwar->getFrameCount() > 15000) {
-		gatewayWanted = 6;
-		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
+	// Build Cyber Core for carrier support late game
+	if (BWAPI::Broodwar->getFrameCount() > 10000) 
+	{
+		gatewayWanted = 5;
+		zealotsWanted = numZealots + 8;
+		
+		if (numCyber < 1)
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
 	}
 
 	// Slow down on cannon production late game
-	if (numCannon >= 12) {
-		cannonsWanted = numCannon + 1;
+	if (numCannon < 9) 
+	{
+		cannonsWanted = std::min(numCannon + 3, 9);
 	}
 
 	// Dragoon production
-	if (numCyber > 0)
+	if ((numCyber > 0) && (numStargate < 1))
 	{
-		dragoonsWanted = numDragoons + 4;
-		zealotsWanted = numZealots + 6;
+		//dragoonsWanted = numDragoons + 4;
+		//zealotsWanted = numZealots + 6;
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Stargate, 1));
+	}
+
+	if ((numCyber > 0) && (numStargate < 1))
+	{
+		//dragoonsWanted = numDragoons + 4;
+		//zealotsWanted = numZealots + 6;
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Corsair, 2));
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
 	}
 
 	// Get some observers if we've expanded
@@ -925,10 +949,13 @@ const MetaPairVector StrategyManager::getProtossCarrierTurtleBuildOrderGoal() co
 
 	// Build order goal requirements
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Photon_Cannon, cannonsWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
+	//goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot, zealotsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe, std::min(90, probesWanted)));
+
+	// Only build probes if we do not have too many idle probes
+	if (WorkerManager::Instance().getNumIdleWorkers() < 8)
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe, std::min(maxProbes, probesWanted)));
 
 	return goal;
 }
@@ -1029,4 +1056,10 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
 
 	 return customBuildOrder;
+ }
+
+ // Get the max probes allowed given the number of nexuses
+ int StrategyManager::getMaxProbeCount() const
+ {
+	return std::min(BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus) * 30, 90);
  }

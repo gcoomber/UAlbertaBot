@@ -40,6 +40,8 @@ class StrategyManager
 	void	readResults();
 	void	writeResults();
 
+	int							getMaxProbeCount() const;
+
 	const	int					getScore(BWAPI::Player * player) const;
 	const	double				getUCBValue(const size_t & strategy) const;
 	

@@ -156,73 +156,6 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 
 		testLocation = (posInRegion != BWAPI::TilePositions::None) ? posInRegion : posNotInRegion;
 	}
-	// special case for the 5th python of the Carrier Turtle build
-	else if ((b.type == BWAPI::UnitTypes::Protoss_Pylon)
-				&& (numPylons == 5)
-				&& (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle))
-	{
-		/*BWTA::Chokepoint * closestChoke;
-		BWAPI::Position homePosition = BWTA::getStartLocation(BWAPI::Broodwar->self())->getPosition();
-		double minChokeDist = 99999;
-
-		// Search for the closest chokepoint to the starting base
-		BOOST_FOREACH(BWTA::Chokepoint * choke, BWTA::getChokepoints())
-		{
-			double dist = choke->getCenter().getDistance(homePosition);
-			if (dist < minChokeDist)
-			{
-				closestChoke = choke;
-				minChokeDist = dist;
-			}
-		}
-
-		// Set desired position of the python to be close to the choke point
-		BWAPI::Position chokePosition = closestChoke->getCenter();
-		BWAPI::TilePosition pylonPos(chokePosition.x() / 32, chokePosition.y() / 32);
-		Building newBuildingLocation(b.type, pylonPos);
-
-		// get a position within our region
-		BWAPI::TilePosition posInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, true, false);
-
-		// get a region anywhere
-		BWAPI::TilePosition posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, false, false);
-
-		// set the location with priority on positions in our own region
-		testLocation = (posInRegion != BWAPI::TilePositions::None) ? posInRegion : posNotInRegion;
-		*/
-
-		BWTA::Chokepoint * closestChoke;
-		BWAPI::Position homePosition = BWTA::getStartLocation(BWAPI::Broodwar->self())->getPosition();
-		double maxGatewayDistance = 0;
-		BWAPI::Unit * furthestGateway;
-
-		// Search for the pylon closest to that chokepoint
-		BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
-		{
-			if (unit->getType() == BWAPI::UnitTypes::Protoss_Pylon)
-			{
-				double dist = unit->getPosition().getDistance(homePosition);
-				if (dist > maxGatewayDistance)
-				{
-					furthestGateway = unit;
-					maxGatewayDistance = dist;
-				}
-			}
-		}
-
-		// Set desired position of the python to be close to the furthest gateway
-		BWAPI::TilePosition pylonPos(furthestGateway->getPosition().x() / 32, furthestGateway->getPosition().y() / 32);
-		Building newBuildingLocation(b.type, pylonPos);
-
-		// get a position within our region
-		BWAPI::TilePosition posInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, true, false);
-
-		// get a region anywhere
-		BWAPI::TilePosition posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, false, false);
-
-		// set the location with priority on positions in our own region
-		testLocation = (posInRegion != BWAPI::TilePositions::None) ? posInRegion : posNotInRegion;
-	}
 	// every other type of building
 	else
 	{
@@ -248,7 +181,7 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 				BWAPI::TilePosition posInRegion;
 				BWAPI::TilePosition posNotInRegion;
 
-				if (numCannons < 6)
+				if (numCannons < 5)
 				{
 					BWTA::Chokepoint * closestChoke;
 					BWAPI::Position homePosition = BWTA::getStartLocation(BWAPI::Broodwar->self())->getPosition();
@@ -290,15 +223,109 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 					// get a region anywhere
 					posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, false, false);
 				}
+				else if (numCannons >= 5)
+				{
+					/*BWAPI::Position homePosition = BWTA::getStartLocation(BWAPI::Broodwar->self())->getPosition();
+					double maxGatewayDist = 0;
+					double minPylonDist = 99999;
+					BWAPI::Unit * closestPylon;
+					BWAPI::Unit * furthestGateway;
+
+					// Search for the furthest gateway from the starting base
+					BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
+					{
+						if (unit->getType() == BWAPI::UnitTypes::Protoss_Gateway)
+						{
+							double dist = unit->getPosition().getDistance(homePosition);
+							if (dist > maxGatewayDist)
+							{
+								furthestGateway = unit;
+								maxGatewayDist = dist;
+							}
+						}
+					}
+					// Search for the pylon closest to that chokepoint
+					BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
+					{
+						if (unit->getType() == BWAPI::UnitTypes::Protoss_Pylon)
+						{
+							double dist = unit->getPosition().getDistance(furthestGateway->getPosition());
+							if (dist < minPylonDist)
+							{
+								closestPylon = unit;
+								minPylonDist = dist;
+							}
+						}
+					}
+					// Set desired position to closest pylon to the furthest gateway
+					cannonPosition = BWAPI::TilePosition(closestPylon->getPosition().x() / 32, closestPylon->getPosition().y() / 32);
+
+					Building newBuildingLocation(b.type, cannonPosition);
+
+					// get a position within our region
+					posInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, true, false);
+
+					// get a region anywhere
+					posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, false, false);
+					*/
+					BWTA::Chokepoint * closestChoke = NULL;
+					BWTA::Chokepoint * secondClosestChoke = NULL;
+					BWAPI::Position homePosition = BWTA::getStartLocation(BWAPI::Broodwar->self())->getPosition();
+					double minChokeDist = 99999;
+					double minPylonDist = 99999;
+					BWAPI::Unit * closestPylon;
+					int numChokes = 0;
+
+					// Search for the closest chokepoint to the starting base
+					BOOST_FOREACH(BWTA::Chokepoint * choke, BWTA::getChokepoints())
+					{
+						double dist = choke->getCenter().getDistance(homePosition);
+						if (dist < minChokeDist)
+						{
+							secondClosestChoke = closestChoke;
+							closestChoke = choke;
+							minChokeDist = dist;
+							++numChokes;
+						}
+					}
+
+					// If more than one choke, use the second closet choke
+					if ((numChokes > 1) && (secondClosestChoke != NULL))
+						closestChoke = secondClosestChoke;
+
+					// Search for the pylon closest to that chokepoint
+					BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->self()->getUnits())
+					{
+						if (unit->getType() == BWAPI::UnitTypes::Protoss_Pylon)
+						{
+							double dist = unit->getPosition().getDistance(closestChoke->getCenter());
+							if (dist < minPylonDist)
+							{
+								closestPylon = unit;
+								minPylonDist = dist;
+							}
+						}
+					}
+					// Set desired position to closest pylon to chokepoint
+					cannonPosition = BWAPI::TilePosition(closestPylon->getPosition().x() / 32, closestPylon->getPosition().y() / 32);
+
+					Building newBuildingLocation(b.type, cannonPosition);
+
+					// get a position within our region
+					posInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, true, false);
+
+					// get a region anywhere
+					posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, false, false);
+				}
 				else
 				{
-					/*
+					
 					// get a position within our region
 					posInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, 0, true, false);
 
 					// get a region anywhere
 					posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(b, 0, false, false);
-					*/
+					/*
 					BWAPI::Position homePosition = BWTA::getStartLocation(BWAPI::Broodwar->self())->getPosition();
 					double minChokeDist = 99999;
 					double minGatewayDist = 99999;
@@ -332,6 +359,7 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 
 					// get a region anywhere
 					posNotInRegion = BuildingPlacer::Instance().getBuildLocationNear(newBuildingLocation, 0, false, false);
+					*/
 				}
 
 				// set the location with priority on positions in our own region
