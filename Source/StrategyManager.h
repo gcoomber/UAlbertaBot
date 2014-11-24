@@ -59,10 +59,8 @@ class StrategyManager
 	const	bool				expandProtossCarrier() const;
 	const	MetaPairVector		getProtossCarrierBuildOrderGoal() const;
 
-	const	bool				expandProtossUpgrades() const;
-	const	MetaPairVector		getProtossUpgradesBuildOrderGoal() const;
-
-	const	MetaPairVector		getProtossAirBuildOrderGoal() const;
+	const	bool				expandProtossCarrierTurtle() const;
+	const	MetaPairVector		getProtossCarrierTurtleBuildOrderGoal() const;
 
 	const	MetaPairVector		getTerranBuildOrderGoal() const;
 	const	MetaPairVector		getZergBuildOrderGoal() const;
@@ -73,7 +71,7 @@ class StrategyManager
 
 public:
 
-	enum ProtossStrategy { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossAir = 3, ProtossCarrier = 4, ProtossUpgrades = 5, NumProtossStrategies = 6 };
+	enum ProtossStrategy { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossCarrier = 3, ProtossCarrierTurtle = 4, NumProtossStrategies = 5 };
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 
