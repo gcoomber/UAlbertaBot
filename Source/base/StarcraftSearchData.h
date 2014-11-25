@@ -96,7 +96,7 @@ public:
 	{
 		if (Options::Debug::DRAW_UALBERTABOT_DEBUG)
 		{
-			BWAPI::Broodwar->drawBoxScreen(x-5, y-15, x+125, y+55, BWAPI::Colors::Black, true);
+			//BWAPI::Broodwar->drawBoxScreen(x-5, y-15, x+125, y+55, BWAPI::Colors::Black, true);
 
 			BWAPI::Broodwar->drawTextScreen(x, y-13,	"\x07Search Information");
 				

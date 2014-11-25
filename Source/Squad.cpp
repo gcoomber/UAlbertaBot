@@ -157,6 +157,12 @@ bool Squad::needsToRegroup()
 		return false;
 	}
 
+	// If doing CannonTurtule strat and haven't lost our main attack, blitz
+	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle) &&
+		BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Zealot) < 30) {
+		return false;
+	}
+
 	// if we are DT rushing and we haven't lost a DT yet, no retreat!
 	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossDarkTemplar &&
 		(BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Dark_Templar) == 0))

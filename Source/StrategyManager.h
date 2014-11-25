@@ -48,6 +48,10 @@ class StrategyManager
 	const	std::string			getProtossZealotRushOpeningBook() const;
 	const	MetaPairVector		getProtossZealotRushBuildOrderGoal() const;
 
+	const	bool				expandProtossCannonTurtle() const;
+	const	std::string			getProtossCannonTurtleOpeningBook() const;
+	const	MetaPairVector		getProtossCannonTurtleBuildOrderGoal() const;
+
 	const	bool				expandProtossDarkTemplar() const;
 	const	std::string			getProtossDarkTemplarOpeningBook() const;
 	const	MetaPairVector		getProtossDarkTemplarBuildOrderGoal() const;
@@ -65,7 +69,7 @@ class StrategyManager
 
 public:
 
-	enum { ProtossZealotRush=0, ProtossDarkTemplar=1, ProtossDragoons=2, NumProtossStrategies=3 };
+	enum { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossCannonTurtle = 3, NumProtossStrategies = 4};
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 

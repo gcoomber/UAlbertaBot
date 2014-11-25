@@ -40,6 +40,7 @@ class InformationManager {
 public:
 
 	bool goForIt;
+	bool attacking;
 	int lastFrameRegroup;
 
 	// yay for singletons!
@@ -63,6 +64,7 @@ public:
 	int						getNumTotalDeadUnits(BWAPI::Player * player);
 	int						numEnemyUnitsInRegion(BWTA::Region * region);
 	int						numEnemyFlyingUnitsInRegion(BWTA::Region * region);
+	int						numEnemyCombatUnits(BWAPI::Player * player);
 	bool					nearbyForceHasCloaked(BWAPI::Position p, BWAPI::Player * player, int radius);
 	bool					isCombatUnit(BWAPI::UnitType type) const;
 	bool					canWinNearby(BWAPI::Position p);

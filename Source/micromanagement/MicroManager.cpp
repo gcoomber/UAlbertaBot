@@ -35,7 +35,14 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	// if the order is to defend, we only care about units in the radius of the defense
 	if (order.type == order.Defend)
 	{
-		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
+		//MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
+		// Defender units have a smaller radius to stay close to make cannons useful
+		if (BWAPI::Broodwar->getFrameCount() < 10000) {
+			MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 700, false, true);
+		}
+		else {
+			MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 300, false, true);
+		}
 	
 	} // otherwise we want to see everything on the way
 	else if (order.type == order.Attack) 
