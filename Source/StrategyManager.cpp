@@ -916,7 +916,7 @@ const MetaPairVector StrategyManager::getProtossCarrierTurtleBuildOrderGoal() co
 	// Slow down on cannon production late game
 	if (numCannon < 9) 
 	{
-		cannonsWanted = std::min(numCannon + 3, 9);
+		cannonsWanted = std::min(numCannon + 3, 8);
 	}
 
 	// Dragoon production
@@ -925,14 +925,20 @@ const MetaPairVector StrategyManager::getProtossCarrierTurtleBuildOrderGoal() co
 		//dragoonsWanted = numDragoons + 4;
 		//zealotsWanted = numZealots + 6;
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Stargate, 1));
+		//goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1));
 	}
 
-	if ((numCyber > 0) && (numStargate < 1))
+	if ((numCyber > 0) 
+		&& (numStargate > 0) 
+		&& (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) == 0))
 	{
 		//dragoonsWanted = numDragoons + 4;
 		//zealotsWanted = numZealots + 6;
-		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Corsair, 2));
+		//goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Corsair, 3));
+		//goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Scout, 2));
+		//goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Carrier, 1));
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Fleet_Beacon, 1));
 	}
 
 	// Get some observers if we've expanded
@@ -1014,6 +1020,9 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 	 case ProtossCarrier:
 		 customBuildOrder = getCarrierCustomBuildOrder();
 		 break;
+	 case ProtossCarrierTurtle:
+		 customBuildOrder = getProtossCarrierTurtleCustomBuildOrder();
+		 break;
 	 default:
 		 break;
 	 }
@@ -1051,6 +1060,45 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 
 		 zealotsWanted += 4;
 	 }
+
+	 for (int i = 0; i < zealotsWanted; ++i)
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+
+	 return customBuildOrder;
+ }
+
+ // Builds and returns a vector of units/buildings/upgrades to be built once
+ // build order search is disabled for the carrier turtle build
+ std::vector<MetaType> StrategyManager::getProtossCarrierTurtleCustomBuildOrder()
+ {
+	 // Vector of units/buildings/ugrades to build
+	 std::vector<MetaType> customBuildOrder;
+
+	 int zealotsWanted = 0;
+
+	 // First build a python if we are low in supply
+	 int totalSupply = BWAPI::Broodwar->self()->supplyTotal();
+	 int supplyAvailable = std::max(0, totalSupply - BWAPI::Broodwar->self()->supplyUsed());
+	 if ((supplyAvailable < 10) && (totalSupply < 200))
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+	 }
+
+	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Carrier);
+	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Carrier);
+
+	 // If we have excess minerals after the carriers are added, use excess minerals on gateways and zealots
+	 /*int freeMinerals = ProductionManager::Instance().getFreeMinerals() - 600;
+	 if (freeMinerals > 500)
+	 {
+		 if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Gateway) < 2)
+			 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Gateway);
+
+		 zealotsWanted += 4;
+	 }*/
+
+	 zealotsWanted += 4;
 
 	 for (int i = 0; i < zealotsWanted; ++i)
 		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);

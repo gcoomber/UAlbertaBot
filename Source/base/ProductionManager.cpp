@@ -133,14 +133,25 @@ void ProductionManager::onUnitDestroy(BWAPI::Unit * unit)
 		
 	if (Options::Modules::USING_MACRO_SEARCH)
 	{
-		// if it's a worker or a building, we need to re-search for the current goal
-		if ((unit->getType().isWorker() && !WorkerManager::Instance().isWorkerScout(unit)) || unit->getType().isBuilding())
+		// Do not get a new build order when a probe dies or a cannon is destroyed during the ProtossCannonTurtle strategy
+		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle) 
 		{
-			BWAPI::Broodwar->printf("Critical unit died, re-searching build order");
-
-			if (unit->getType() != BWAPI::UnitTypes::Zerg_Drone)
+			if ((unit->getType().isBuilding()) && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon)) 
 			{
+				BWAPI::Broodwar->printf("Critical building destroyed, re-searching build order");
 				performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+			}
+		}
+		else {
+			// if it's a worker or a building, we need to re-search for the current goal
+			if ((unit->getType().isWorker() && !WorkerManager::Instance().isWorkerScout(unit)) || unit->getType().isBuilding())
+			{
+				BWAPI::Broodwar->printf("Critical unit died, re-searching build order");
+
+				if (unit->getType() != BWAPI::UnitTypes::Zerg_Drone)
+				{
+					performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
+				}
 			}
 		}
 	}
@@ -539,7 +550,15 @@ bool ProductionManager::useBuildOrderSearch()
 {
 	// For ProtossCarrier build, disable the build order search for stability, as we enter mid game
 	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrier)
+	{
 		return false;
+	}
+	// Disable the build order search for the turtling carrier build once carriers can be built
+	else if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle)
+				&& BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) > 0)
+	{
+		return false;
+	}
 
 	return true;
 }

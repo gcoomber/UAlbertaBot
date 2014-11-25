@@ -24,11 +24,42 @@ void CombatCommander::update(std::set<BWAPI::Unit *> unitsToAssign)
 		// give back combat workers to worker manager
 		WorkerManager::Instance().finishedWithCombatWorkers();
         
-		// Assign defense and attack squads
-        assignScoutDefenseSquads();
-		assignDefenseSquads(unitsToAssign);
-		assignAttackSquads(unitsToAssign);
-		assignIdleSquads(unitsToAssign);
+		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle)
+		{
+			std::set<BWAPI::Unit*> airUnitsToAssign;
+			std::set<BWAPI::Unit*> groundUnitsToAssign;
+
+			BOOST_FOREACH(BWAPI::Unit * unit, unitsToAssign)
+			{
+				if (unit->getType().isFlyer())
+				{
+					// Polulate the set of air units
+					airUnitsToAssign.insert(unit);
+				}
+				else
+				{
+					// Polulate the set of ground units
+					groundUnitsToAssign.insert(unit);
+				}
+			}
+
+			// Assign air and ground units to seperate sqauds
+			//if (airUnitsToAssign.size() > 0)
+			assignAirSquads(airUnitsToAssign);
+
+			assignScoutDefenseSquads();
+			assignDefenseSquads(groundUnitsToAssign);
+			assignAttackSquads(groundUnitsToAssign);
+			assignIdleSquads(groundUnitsToAssign);
+		}
+		else
+		{
+			// Assign defense and attack squads
+			assignScoutDefenseSquads();
+			assignDefenseSquads(unitsToAssign);
+			assignAttackSquads(unitsToAssign);
+			assignIdleSquads(unitsToAssign);
+		}
 	}
 
 	squadData.update();
@@ -68,6 +99,32 @@ void CombatCommander::assignAttackSquads(std::set<BWAPI::Unit *> & unitsToAssign
 		assignAttackVisibleUnits(unitsToAssign);			// attack visible enemy units
 		assignAttackExplore(unitsToAssign);				// attack and explore for unknown units
 	} 
+}
+
+void CombatCommander::assignAirSquads(std::set<BWAPI::Unit *> & unitsToAssign)
+{
+	if (unitsToAssign.empty()) { return; }
+
+	bool workersDefending = false;
+	BOOST_FOREACH(BWAPI::Unit * unit, unitsToAssign)
+	{
+		if (unit->getType().isWorker())
+		{
+			workersDefending = true;
+		}
+	}
+
+	// do we have workers in combat
+	bool attackEnemy = !unitsToAssign.empty() && !workersDefending && StrategyManager::Instance().doAttack(unitsToAssign);
+	//bool attackEnemy = true;
+	// if we are attacking, what area are we attacking?
+	if (attackEnemy)
+	{
+		//assignAttackRegion(unitsToAssign);				// attack occupied enemy region
+		assignAttackKnownBuildings(unitsToAssign);		// attack known enemy buildings
+		//assignAttackVisibleUnits(unitsToAssign);			// attack visible enemy units
+		//assignAttackExplore(unitsToAssign);				// attack and explore for unknown units
+	}
 }
 
 BWTA::Region * CombatCommander::getClosestEnemyRegion()

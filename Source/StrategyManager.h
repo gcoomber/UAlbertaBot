@@ -93,4 +93,5 @@ public:
 
 	std::vector<MetaType>		getCustomBuildOrder();
 	std::vector<MetaType>		getCarrierCustomBuildOrder();
+	std::vector<MetaType>		getProtossCarrierTurtleCustomBuildOrder();
 };

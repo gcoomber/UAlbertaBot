@@ -42,7 +42,7 @@ void Squad::update()
 
 		meleeManager.regroup(regroupPosition);
 		rangedManager.regroup(regroupPosition);
-		airManager.regroup(regroupPosition);
+		//airManager.regroup(regroupPosition);
 	}
 	else // otherwise, execute micro
 	{
