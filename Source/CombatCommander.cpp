@@ -48,7 +48,7 @@ void CombatCommander::update(std::set<BWAPI::Unit *> unitsToAssign)
 			assignAirSquads(airUnitsToAssign);
 
 			assignScoutDefenseSquads();
-			assignDefenseSquads(groundUnitsToAssign);
+			//assignDefenseSquads(groundUnitsToAssign);
 			assignAttackSquads(groundUnitsToAssign);
 			assignIdleSquads(groundUnitsToAssign);
 		}
@@ -71,6 +71,8 @@ void CombatCommander::assignIdleSquads(std::set<BWAPI::Unit *> & unitsToAssign)
 
 	UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 	unitsToAssign.clear();
+
+	int radius = (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle) ? 600 : 1000;
 
 	squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::Defend, BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), 1000, "Defend Idle")));
 }
@@ -115,15 +117,15 @@ void CombatCommander::assignAirSquads(std::set<BWAPI::Unit *> & unitsToAssign)
 	}
 
 	// do we have workers in combat
-	bool attackEnemy = !unitsToAssign.empty() && !workersDefending && StrategyManager::Instance().doAttack(unitsToAssign);
-	//bool attackEnemy = true;
+	//bool attackEnemy = !unitsToAssign.empty() && !workersDefending && StrategyManager::Instance().doAttack(unitsToAssign);
+	bool attackEnemy = true;
 	// if we are attacking, what area are we attacking?
 	if (attackEnemy)
 	{
-		//assignAttackRegion(unitsToAssign);				// attack occupied enemy region
+		assignAttackRegion(unitsToAssign);				// attack occupied enemy region
 		assignAttackKnownBuildings(unitsToAssign);		// attack known enemy buildings
-		//assignAttackVisibleUnits(unitsToAssign);			// attack visible enemy units
-		//assignAttackExplore(unitsToAssign);				// attack and explore for unknown units
+		assignAttackVisibleUnits(unitsToAssign);			// attack visible enemy units
+		assignAttackExplore(unitsToAssign);				// attack and explore for unknown units
 	}
 }
 

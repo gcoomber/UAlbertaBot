@@ -20,4 +20,7 @@ public:
 	BWAPI::Unit * getTarget(BWAPI::Unit * airUnit, UnitVector & targets);
 
 	void kiteTarget(BWAPI::Unit * airUnit, BWAPI::Unit * target);
+
+private:
+	bool isValidTarget(BWAPI::Unit * target) const;
 };

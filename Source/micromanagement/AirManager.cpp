@@ -5,18 +5,25 @@ AirManager::AirManager() { }
 
 void AirManager::executeMicro(const UnitVector & targets)
 {
+	BWTA::BaseLocation * enemyLocation = InformationManager::Instance().getMainBaseLocation(BWAPI::Broodwar->enemy());
+	BWTA::Region * enemyRegion = enemyLocation->getRegion();
+
 	const UnitVector & airUnits = getUnits();
+	int squadSize = airUnits.size();
 
 	// figure out targets
 	UnitVector airUnitTargets;
 	for (size_t i(0); i<targets.size(); i++)
 	{
 		// conditions for targeting
-		if (targets[i]->isVisible())
+		if (targets[i]->isVisible() && isValidTarget(targets[i]))
 		{
 			airUnitTargets.push_back(targets[i]);
 		}
 	}
+
+	if (squadSize < 3)
+		return;
 
 	// for each air unit
 	BOOST_FOREACH(BWAPI::Unit * airUnit, airUnits)
@@ -25,8 +32,8 @@ void AirManager::executeMicro(const UnitVector & targets)
 		trainSubUnits(airUnit);
 
 		// if the order is to attack or defend
-		if (order.type == order.Attack || order.type == order.Defend) {
-
+		if (order.type == order.Attack || order.type == order.Defend)
+		{
 			// if there are targets
 			if (!airUnitTargets.empty())
 			{
@@ -43,7 +50,9 @@ void AirManager::executeMicro(const UnitVector & targets)
 				if (airUnit->getDistance(order.position) > 100)
 				{
 					// move to it
-					smartAttackMove(airUnit, order.position);
+					//smartAttackMove(airUnit, order.position);
+					//smartMove(airUnit, order.position);
+					smartMove(airUnit, enemyRegion->getCenter());
 				}
 			}
 		}
@@ -224,4 +233,15 @@ BWAPI::Unit * AirManager::closestrangedUnit(BWAPI::Unit * target, std::set<BWAPI
 	}
 
 	return closest;
+}
+
+bool AirManager::isValidTarget(BWAPI::Unit * target) const
+{
+	// Only allow air units to attack air units, or harrass probes
+	BWAPI::UnitType targetType = target->getType();
+
+	return (targetType == BWAPI::UnitTypes::Protoss_Probe)
+			|| (targetType == BWAPI::UnitTypes::Terran_SCV)
+			|| (targetType == BWAPI::UnitTypes::Zerg_Drone)
+			|| targetType.isFlyer();
 }

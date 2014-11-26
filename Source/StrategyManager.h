@@ -34,6 +34,7 @@ class StrategyManager
 	BWAPI::Race					enemyRace;
 
 	bool						firstAttackSent;
+	bool						allowRetreat;
 
 	void	addStrategies();
 	void	setStrategy();
@@ -85,6 +86,7 @@ public:
 	const	bool				doAttack(const std::set<BWAPI::Unit *> & freeUnits);
 	const	int				    defendWithWorkers();
 	const	bool				rushDetected();
+	bool						isRetreatEnabled() const;
 
 	const	int					getCurrentStrategy();
 
