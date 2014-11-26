@@ -41,7 +41,7 @@ void CombatCommander::assignIdleSquads(std::set<BWAPI::Unit *> & unitsToAssign)
 	UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 	unitsToAssign.clear();
 
-	int radius = (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle) ? 600 : 1000;
+	int radius = (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle) ? 600 : 1000;
 
 	squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::Defend, BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), 1000, "Defend Idle")));
 }

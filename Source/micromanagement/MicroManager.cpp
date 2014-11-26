@@ -37,7 +37,7 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	if (order.type == order.Defend)
 	{
 		int defendRadius = 0;
-		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle)
+		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
 		{
 			// Defender units have smaller radius for turtle strategies to stay close to make cannons useful
 			defendRadius = 550;

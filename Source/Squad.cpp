@@ -171,8 +171,9 @@ bool Squad::needsToRegroup()
 		return false;
 	}
 
+	// When attacking with the aggresive turtle build, only regroup if retreating is enabled
 	if (InformationManager::Instance().getIsAttacking()
-		&& (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle)
+		&& (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
 		&& !StrategyManager::Instance().isRetreatEnabled())
 		return false;
 

@@ -133,8 +133,8 @@ void ProductionManager::onUnitDestroy(BWAPI::Unit * unit)
 		
 	if (Options::Modules::USING_MACRO_SEARCH)
 	{
-		// Do not get a new build order when a probe dies or a cannon is destroyed during the ProtossCannonTurtle strategy
-		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle) 
+		// Do not get a new build order when a probe dies or a cannon is destroyed during the AggressiveTurtle strategy
+		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
 		{
 			if ((unit->getType().isBuilding()) && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon)) 
 			{
@@ -548,13 +548,9 @@ void ProductionManager::onGameEnd()
 // Returns true if the build order search should be used to set the build order.
 bool ProductionManager::useBuildOrderSearch()
 {
-	// For ProtossCarrier build, disable the build order search for stability, as we enter mid game
-	if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrier)
-	{
-		return false;
-	}
-	// Disable the build order search for the turtling carrier build once carriers can be built
-	else if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle)
+	// Disable the build order search for the turtling carrier build if carriers can be built
+	// as attempting to build carriers using build order search causes crashes
+	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
 				&& BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) > 0)
 	{
 		return false;

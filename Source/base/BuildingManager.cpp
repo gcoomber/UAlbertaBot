@@ -175,7 +175,7 @@ BWAPI::TilePosition BuildingManager::getBuildingLocation(const Building & b)
 		// If it is a photon cannon
 		else if (b.type == BWAPI::UnitTypes::Protoss_Photon_Cannon) 
 		{
-			if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCarrierTurtle)
+			if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
 			{
 				BWAPI::TilePosition cannonPosition;
 				BWAPI::TilePosition posInRegion;

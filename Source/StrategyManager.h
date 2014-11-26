@@ -60,11 +60,8 @@ class StrategyManager
 	const	std::string			getProtossDragoonsOpeningBook() const;
 	const	MetaPairVector		getProtossDragoonsBuildOrderGoal() const;
 
-	const	bool				expandProtossCarrier() const;
-	const	MetaPairVector		getProtossCarrierBuildOrderGoal() const;
-
-	const	bool				expandProtossCarrierTurtle() const;
-	const	MetaPairVector		getProtossCarrierTurtleBuildOrderGoal() const;
+	const	bool				expandProtossAggressiveTurtle() const;
+	const	MetaPairVector		getProtossAggressiveTurtleBuildOrderGoal() const;
 
 	const	MetaPairVector		getTerranBuildOrderGoal() const;
 	const	MetaPairVector		getZergBuildOrderGoal() const;
@@ -75,7 +72,7 @@ class StrategyManager
 
 public:
 
-	enum ProtossStrategy { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossCarrier = 3, ProtossCarrierTurtle = 4, NumProtossStrategies = 5 };
+	enum ProtossStrategy { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossAggressiveTurtle = 3, NumProtossStrategies = 4 };
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 
@@ -96,6 +93,5 @@ public:
 	const	std::string			getOpeningBook() const;
 
 	std::vector<MetaType>		getCustomBuildOrder();
-	std::vector<MetaType>		getCarrierCustomBuildOrder();
-	std::vector<MetaType>		getProtossCarrierTurtleCustomBuildOrder();
+	std::vector<MetaType>		getProtossAggressiveTurtleCustomBuildOrder();
 };
