@@ -448,6 +448,21 @@ bool InformationManager::enemyHasDetector()
 	return enemyUnitData.hasDetectorUnits();
 }
 
+// Check if the enmy has any flying combat units
+bool InformationManager::enemyFlyerThreat()
+{
+	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
+	{
+		BWAPI::UnitType unitType = unit->getType();
+		if (unitType.isFlyer() && isCombatUnit(unitType))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool InformationManager::tileContainsUnit(BWAPI::TilePosition tile)
 {
 	return map.canBuildHere(tile);

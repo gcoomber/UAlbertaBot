@@ -29,6 +29,7 @@ class StrategyManager
 	std::vector<IntPair>		results;
 	std::vector<int>			usableStrategies;
 	int							currentStrategy;
+	int							currentArmySizeAdvantage;
 
 	BWAPI::Race					selfRace;
 	BWAPI::Race					enemyRace;
@@ -87,6 +88,7 @@ public:
 	const	int				    defendWithWorkers();
 	const	bool				rushDetected();
 	bool						isRetreatEnabled() const;
+	int							getCurrentArmySizeAdvantage() const;
 
 	const	int					getCurrentStrategy();
 

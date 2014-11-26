@@ -50,9 +50,8 @@ void AirManager::executeMicro(const UnitVector & targets)
 				if (airUnit->getDistance(order.position) > 100)
 				{
 					// move to it
-					//smartAttackMove(airUnit, order.position);
-					//smartMove(airUnit, order.position);
-					smartMove(airUnit, enemyRegion->getCenter());
+					smartAttackMove(airUnit, order.position);
+					//smartMove(airUnit, enemyRegion->getCenter());
 				}
 			}
 		}
@@ -135,13 +134,8 @@ BWAPI::Unit * AirManager::getTarget(BWAPI::Unit * airUnit, UnitVector & targets)
 	int lowestInRangeHitPoints(10000);
 	int lowestNotInRangeDistance(10000);
 
-	//int lowestInRangeBuildingHitPoints(100000);
-	//int lowestNotInRangeBuildingHitPoints(100000);
-
 	BWAPI::Unit * inRangeTarget = NULL;
 	BWAPI::Unit * notInRangeTarget = NULL;
-	//BWAPI::Unit * inRangeBuilding = NULL;
-	//BWAPI::Unit * notInRangeBuilding = NULL;
 
 	BOOST_FOREACH(BWAPI::Unit * unit, targets)
 	{
@@ -151,11 +145,6 @@ BWAPI::Unit * AirManager::getTarget(BWAPI::Unit * airUnit, UnitVector & targets)
 		// if the unit is in range, update the target with the lowest hp
 		if (airUnit->getDistance(unit) <= range)
 		{
-			/*if (unit->getType().isBuilding() && unit->getHitPoints() < lowestInRangeBuildingHitPoints)
-			{
-				inRangeBuilding = unit;
-			}*/
-
 			if (priority > highestInRangePriority ||
 				(priority == highestInRangePriority && unit->getHitPoints() < lowestInRangeHitPoints))
 			{
@@ -167,11 +156,6 @@ BWAPI::Unit * AirManager::getTarget(BWAPI::Unit * airUnit, UnitVector & targets)
 		// otherwise it isn't in range so see if it's closest
 		else
 		{
-			/*if (unit->getType().isBuilding() && unit->getHitPoints() < lowestNotInRangeBuildingHitPoints)
-			{
-				notInRangeBuilding = unit;
-			}*/
-
 			if (priority > highestNotInRangePriority ||
 				(priority == highestNotInRangePriority && distance < lowestNotInRangeDistance))
 			{
@@ -181,9 +165,6 @@ BWAPI::Unit * AirManager::getTarget(BWAPI::Unit * airUnit, UnitVector & targets)
 			}
 		}
 	}
-
-	//if (inRangeBuilding != NULL || notInRangeBuilding != NULL)
-		//return (inRangeBuilding != NULL) ? inRangeBuilding : notInRangeBuilding;
 
 	// if there is a highest priority unit in range, attack it first
 	return (highestInRangePriority >= highestNotInRangePriority) ? inRangeTarget : notInRangeTarget;

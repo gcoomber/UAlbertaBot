@@ -22,13 +22,13 @@ class CombatCommander
     void				assignScoutDefenseSquads();
 	void				assignDefenseSquads(std::set<BWAPI::Unit *> & combatUnits);
 	void				assignAttackSquads(std::set<BWAPI::Unit *> & combatUnits);
-	void				assignAirSquads(std::set<BWAPI::Unit *> & combatUnits);
 	void				assignIdleSquads(std::set<BWAPI::Unit *> & combatUnits);
 
 	void				assignAttackRegion(std::set<BWAPI::Unit *> & unitsToAssign);
 	void				assignAttackVisibleUnits(std::set<BWAPI::Unit *> & unitsToAssign);
 	void				assignAttackKnownBuildings(std::set<BWAPI::Unit *> & unitsToAssign);
 	void				assignAttackExplore(std::set<BWAPI::Unit *> & unitsToAssign);
+	void				assignAttackAirUnits(std::set<BWAPI::Unit *> & unitsToAssign);
 
 	bool				isBuildingAtBaselocation(BWTA::BaseLocation * baseLocation);
 	bool				squadUpdateFrame();
