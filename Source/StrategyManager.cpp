@@ -348,7 +348,7 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 			{
 				// If we have leg enhancements, allow our army to attack a more powerfull army
 				// Or if in late game, attack so we don't mine out with our 1 base
-				doAttack = (currentArmySizeAdvantage >= 4) || ((frame > 20000) && (currentArmySizeAdvantage > -10));
+				doAttack = (currentArmySizeAdvantage >= 6) || ((frame > 20000) && (currentArmySizeAdvantage > -10));
 			}
 			else
 			{
@@ -935,6 +935,13 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
  // build order search is disabled for the aggressive turtle build
  std::vector<MetaType> StrategyManager::getProtossAggressiveTurtleCustomBuildOrder()
  {
+	 // frame count
+	 // army size
+	 // supply
+	 // expansions
+
+
+
 	 // Vector of units/buildings/ugrades to build
 	 std::vector<MetaType> customBuildOrder;
 

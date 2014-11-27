@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "MeleeManager.h"
+#include "StrategyManager.h"
 
 MeleeManager::MeleeManager() { }
 
@@ -91,6 +92,7 @@ BWAPI::Unit * MeleeManager::getTarget(BWAPI::Unit * meleeUnit, UnitVector & targ
 	// get the attack priority of a type in relation to a zergling
 int MeleeManager::getAttackPriority(BWAPI::Unit * unit) 
 {
+	int frame = BWAPI::Broodwar->getFrameCount();
 	BWAPI::UnitType type = unit->getType();
 
 	// highest priority is something that can attack us or aid in combat
@@ -102,12 +104,21 @@ int MeleeManager::getAttackPriority(BWAPI::Unit * unit)
 		(type.isWorker() && unitNearChokepoint(unit))) 
 	{
 		return 10;
-	} 
+	}
+	else if ((frame > 22000)
+			&& (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
+			&& (StrategyManager::Instance().getCurrentArmySizeAdvantage() > 50)
+			&& type.isBuilding())
+	{
+		//&& ((type == BWAPI::UnitTypes::Protoss_Gateway) || (type == BWAPI::UnitTypes::Terran_Barracks) || (type == BWAPI::UnitTypes::Zerg_Hatchery))
+		// If we have the enemy close to death in the end game, target gateways
+		return 9;
+	}
 	// next priority is worker
 	else if (type.isWorker()) 
 	{
 		return 9;
-	} 
+	}
 	// next is special buildings
 	else if (type == BWAPI::UnitTypes::Protoss_Pylon || type == BWAPI::UnitTypes::Zerg_Spire)
 	{
