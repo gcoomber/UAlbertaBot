@@ -129,7 +129,19 @@ BWAPI::Unit * RangedManager::getTarget(BWAPI::Unit * rangedUnit, UnitVector & ta
 	{
 		int priority = getAttackPriority(rangedUnit, unit);
 		int distance = rangedUnit->getDistance(unit);
-		double dangerRatio = (unit->getType().groundWeapon().damageAmount()) / (unit->getHitPoints());
+		
+		double dangerRatio = 0;
+		int targetHealth = unit->getHitPoints();
+		
+		// If target has zero health, it is not danerous to us
+		if (targetHealth <= 0)
+		{
+			dangerRatio = 0;
+		}
+		else
+		{
+			dangerRatio = (unit->getType().groundWeapon().damageAmount()) / targetHealth;
+		}
 
 		// if the unit is in range, update the target with the highest Danger ratio
 		if (rangedUnit->getDistance(unit) <= range)

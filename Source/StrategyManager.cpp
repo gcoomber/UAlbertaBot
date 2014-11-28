@@ -144,7 +144,10 @@ void StrategyManager::readResults()
 		results[ProtossCannonTurtle].first = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossCannonTurtle].second = atoi(line.c_str());
-
+		getline(f_in, line);
+		results[ProtossAggressiveTurtle].first = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossAggressiveTurtle].second = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossExtendedZealotRush].first = atoi(line.c_str());
 		getline(f_in, line);
@@ -169,7 +172,8 @@ void StrategyManager::writeResults()
 	f_out << results[ProtossDragoons].second    << "\n";
 	f_out << results[ProtossCannonTurtle].first << "\n";
 	f_out << results[ProtossCannonTurtle].second << "\n";
-
+	f_out << results[ProtossAggressiveTurtle].first << "\n";
+	f_out << results[ProtossAggressiveTurtle].second << "\n";
 	f_out << results[ProtossExtendedZealotRush].first << "\n";
 	f_out << results[ProtossExtendedZealotRush].second << "\n";
 	

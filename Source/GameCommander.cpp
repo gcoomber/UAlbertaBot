@@ -124,8 +124,6 @@ void GameCommander::setValidUnits()
 // TODO: take this worker away from worker manager in a clever way
 void GameCommander::setScoutUnits()
 {
-	bool needNewScout = false;
-
 	// if we have just built our first suply provider, set the worker to a scout
 	if (numWorkerScouts == 0)
 	{
@@ -235,10 +233,6 @@ BWAPI::Unit * GameCommander::getFirstSupplyProvider()
 			if (unit->getType() == BWAPI::Broodwar->self()->getRace().getSupplyProvider())
 			{
 				supplyProvider = unit;
-				// Do not assign the current supply provider if its already scouting
-				//if ((unit != currentScout)
-				//	&& ((numWorkerScouts == 0) || (unit->isGatheringMinerals())))
-				//	supplyProvider = unit;
 			}
 		}
 	}
