@@ -124,8 +124,32 @@ void GameCommander::setValidUnits()
 // TODO: take this worker away from worker manager in a clever way
 void GameCommander::setScoutUnits()
 {
+	bool needNewScout = false;
+
 	// if we have just built our first suply provider, set the worker to a scout
 	if (numWorkerScouts == 0)
+	{
+		needNewScout = true;
+	}
+	else if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
+	{
+		// Add late game scouting logic
+		if ((BWAPI::Broodwar->getFrameCount() > 7000) && (numWorkerScouts < 2))
+		{
+			// If our army appears much larger at the start of the game, scout
+			if (StrategyManager::Instance().getCurrentArmySizeAdvantage() > 10)
+			{
+				needNewScout = true;
+			}
+		}
+		else if ((BWAPI::Broodwar->getFrameCount() > 25000) && (numWorkerScouts < 3))
+		{
+			// Look for expansions late game
+			needNewScout = true;
+		}
+	}
+
+	if (needNewScout)
 	{
 		// get the first supply provider we come across in our units, this should be the first one we make
 		BWAPI::Unit * supplyProvider = getFirstSupplyProvider();
@@ -135,6 +159,7 @@ void GameCommander::setScoutUnits()
 		{
 			// grab the closest worker to the supply provider to send to scout
 			BWAPI::Unit * workerScout = getClosestWorkerToTarget(supplyProvider->getPosition());
+			currentScout = workerScout;
 
 			// if we find a worker (which we should) add it to the scout vector
 			if (workerScout)
@@ -232,7 +257,10 @@ BWAPI::Unit * GameCommander::getFirstSupplyProvider()
 		{
 			if (unit->getType() == BWAPI::Broodwar->self()->getRace().getSupplyProvider())
 			{
-				supplyProvider = unit;
+				// Do not assign the current supply provider if its already scouting
+				if ((unit != currentScout)
+					&& ((numWorkerScouts == 0) || (unit->isGatheringMinerals())))
+					supplyProvider = unit;
 			}
 		}
 	}

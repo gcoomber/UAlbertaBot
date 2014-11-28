@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "MicroManager.h"
+#include "StrategyManager.h"
 
 void MicroManager::setUnits(const UnitVector & u) 
 { 
@@ -35,14 +36,26 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 	// if the order is to defend, we only care about units in the radius of the defense
 	if (order.type == order.Defend)
 	{
-		//MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 800, false, true);
-		// Defender units have a smaller radius to stay close to make cannons useful
-		if (BWAPI::Broodwar->getFrameCount() < 10000) {
-			MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 700, false, true);
+		int defendRadius = 0;
+		int frame = BWAPI::Broodwar->getFrameCount();
+
+		// Defender units have a smaller radius to stay close to make cannons useful in turtle builds
+		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
+		{
+			// For aggressive turtle strategy, stay closer to the base center early game 
+			// since we have fewer cannons
+			defendRadius = (frame < 10000) ? 550 : 800;
 		}
-		else {
-			MapGrid::Instance().GetUnits(nearbyEnemies, order.position, 300, false, true);
+		else if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle)
+		{
+			defendRadius = (frame < 10000) ? 700 : 300;
 		}
+		// Default
+		else
+		{
+			defendRadius = 800;
+		}
+		MapGrid::Instance().GetUnits(nearbyEnemies, order.position, defendRadius, false, true);
 	
 	} // otherwise we want to see everything on the way
 	else if (order.type == order.Attack) 
@@ -262,7 +275,10 @@ void MicroManager::trainSubUnits(BWAPI::Unit * unit) const
 	}
 	else if (unit->getType() == BWAPI::UnitTypes::Protoss_Carrier)
 	{
-		unit->train(BWAPI::UnitTypes::Protoss_Interceptor);
+		// Without Carrier Capacity upgrade, Carriers have a max interceptor count of 4. 
+		int maxInterceptorCount = (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Carrier_Capacity) == 0) ? 4 : 8;
+		if (unit->getInterceptorCount() < maxInterceptorCount)
+			unit->train(BWAPI::UnitTypes::Protoss_Interceptor);
 	}
 }
 

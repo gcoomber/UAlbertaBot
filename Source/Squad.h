@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Common.h"
+#include "micromanagement/AirManager.h"
 #include "micromanagement/MeleeManager.h"
 #include "micromanagement/RangedManager.h"
 #include "micromanagement/DetectorManager.h"
@@ -27,6 +28,7 @@ class Squad
 	bool				squadObserverNear(BWAPI::Position p);
 	
 	SquadOrder			order;
+	AirManager			airManager;
 	MeleeManager		meleeManager;
 	RangedManager		rangedManager;
 	DetectorManager		detectorManager;

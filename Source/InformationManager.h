@@ -40,7 +40,6 @@ class InformationManager {
 public:
 
 	bool goForIt;
-	bool attacking;
 	int lastFrameRegroup;
 
 	// yay for singletons!
@@ -87,9 +86,15 @@ public:
 	bool						enemyHasCloakedUnits();
 	bool						enemyHasDetector();
 
+	bool						getIsAttacking();
+	void						setIsAttacking(bool attacking);
+
 	void						drawUnitInformation(int x, int y);
 
 	SparCraft::Map *			getMap() { return &map; }
+
+private:
+	bool isAttacking;
 };
 
 

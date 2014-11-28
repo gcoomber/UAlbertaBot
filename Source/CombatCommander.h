@@ -28,6 +28,7 @@ class CombatCommander
 	void				assignAttackVisibleUnits(std::set<BWAPI::Unit *> & unitsToAssign);
 	void				assignAttackKnownBuildings(std::set<BWAPI::Unit *> & unitsToAssign);
 	void				assignAttackExplore(std::set<BWAPI::Unit *> & unitsToAssign);
+	void				assignAttackAirUnits(std::set<BWAPI::Unit *> & unitsToAssign);
 
 	bool				isBuildingAtBaselocation(BWTA::BaseLocation * baseLocation);
 	bool				squadUpdateFrame();

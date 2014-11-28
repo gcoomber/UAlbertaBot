@@ -46,6 +46,7 @@ class ProductionManager
 	BuildOrderQueue				queue;
 	BWAPI::UnitType				getProducer(MetaType t);
 
+	bool						useBuildOrderSearch();
 	bool						contains(UnitVector & units, BWAPI::Unit * unit);
 	void						populateTypeCharMap();
 	bool						hasResources(BWAPI::UnitType type);
@@ -61,12 +62,12 @@ class ProductionManager
 
 	bool						detectBuildOrderDeadlock();
 
-	int							getFreeMinerals();
-	int							getFreeGas();
-
 public:
 
 	static ProductionManager &	Instance();
+
+	int							getFreeMinerals();
+	int							getFreeGas();
 
 	void						drawQueueInformation(std::map<BWAPI::UnitType, int> & numUnits, int x, int y, int index);
 	void						update();

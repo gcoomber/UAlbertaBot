@@ -41,7 +41,18 @@ void ProductionManager::setBuildOrder(const std::vector<MetaType> & buildOrder)
 
 void ProductionManager::performBuildOrderSearch(const std::vector< std::pair<MetaType, UnitCountType> > & goal)
 {	
-	std::vector<MetaType> buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
+	std::vector<MetaType> buildOrder;
+	
+	// Check if build order search is currently enabled
+	if (useBuildOrderSearch())
+	{
+		buildOrder = StarcraftBuildOrderSearchManager::Instance().findBuildOrder(goal);
+	}
+	else
+	{
+		// If build order search is disabled, get the custom build order for the current strategy
+		buildOrder = StrategyManager::Instance().getCustomBuildOrder();
+	}
 
 	// set the build order
 	setBuildOrder(buildOrder);
@@ -120,18 +131,22 @@ void ProductionManager::onUnitDestroy(BWAPI::Unit * unit)
 		
 	if (Options::Modules::USING_MACRO_SEARCH)
 	{
-		// If using ProtossCannonTurtle strategy
-		if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle) {
+		// If using ProtossCannonTurtle or ProtossAggrissiveTurtle strategy
+		if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle)
+			|| (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle))
+		{
 			// If enemy does not have cloaked units, ignore death of probes and cannons
 			if (!InformationManager::Instance().enemyHasCloakedUnits()){
-				if ((unit->getType().isBuilding()) && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon)) {
+				if ((unit->getType().isBuilding()) && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon))
+				{
 					BWAPI::Broodwar->printf("Critical building destroyed, re-searching build order");
 					performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
 				}
 			}
 			// If enemy does have cloaked units, do not ignore death of probes
 			else if ((unit->getType().isWorker() && !WorkerManager::Instance().isWorkerScout(unit)) || 
-				(unit->getType().isBuilding() && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon))) {
+				(unit->getType().isBuilding() && (unit->getType() != BWAPI::UnitTypes::Protoss_Photon_Cannon)))
+			{
 				BWAPI::Broodwar->printf("Critical unit died, re-searching build order");
 				performBuildOrderSearch(StrategyManager::Instance().getBuildOrderGoal());
 			}
@@ -537,4 +552,18 @@ ProductionManager & ProductionManager::Instance() {
 void ProductionManager::onGameEnd()
 {
 	buildLearner.onGameEnd();
+}
+
+// Returns true if the build order search should be used to set the build order.
+bool ProductionManager::useBuildOrderSearch()
+{
+	// Disable the build order search for the turtling carrier build if carriers can be built
+	// as attempting to build carriers using build order search causes crashes
+	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
+		&& BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) > 0)
+	{
+		return false;
+	}
+
+	return true;
 }

@@ -44,6 +44,9 @@ void CombatCommander::assignIdleSquads(std::set<BWAPI::Unit *> & unitsToAssign)
 	UnitVector combatUnits(unitsToAssign.begin(), unitsToAssign.end());
 	unitsToAssign.clear();
 
+	// Limit the radius of the defend idle order if using the AggressiveTurtle strategy
+	int radius = (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle) ? 600 : 1000;
+
 	squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::Defend, BWAPI::Position(BWAPI::Broodwar->self()->getStartLocation()), 1000, "Defend Idle")));
 }
 
@@ -294,6 +297,31 @@ void CombatCommander::assignAttackExplore(std::set<BWAPI::Unit *> & unitsToAssig
 	unitsToAssign.clear();
 
 	squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::Attack, MapGrid::Instance().getLeastExplored(), 1000, "Attack Explore")));
+}
+
+void CombatCommander::assignAttackAirUnits(std::set<BWAPI::Unit *> & unitsToAssign)
+{
+	if (unitsToAssign.empty()) { return; }
+
+	BOOST_FOREACH(BWAPI::Unit * target, BWAPI::Broodwar->enemy()->getUnits())
+	{
+		// Look for air targets to attack
+		if (target->isVisible() && target->getType().isFlyer())
+		{
+			UnitVector combatUnits;
+			BOOST_FOREACH(BWAPI::Unit * unit, unitsToAssign)
+			{
+				if (unit->getType().isFlyer())
+				{
+					combatUnits.push_back(unit);
+					unitsToAssign.erase(unit);
+				}
+			}
+
+			squadData.addSquad(Squad(combatUnits, SquadOrder(SquadOrder::Attack, target->getPosition(), 1000, "Attack Air Unit")));
+			return;
+		}
+	}
 }
 
 BWAPI::Unit* CombatCommander::findClosestDefender(std::set<BWAPI::Unit *> & enemyUnitsInRegion, const std::set<BWAPI::Unit *> & units) 

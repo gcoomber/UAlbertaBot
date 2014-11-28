@@ -1,5 +1,6 @@
 #include "Common.h"
 #include "MeleeManager.h"
+#include "StrategyManager.h"
 
 MeleeManager::MeleeManager() { }
 
@@ -91,6 +92,7 @@ BWAPI::Unit * MeleeManager::getTarget(BWAPI::Unit * meleeUnit, UnitVector & targ
 	// get the attack priority of a type in relation to a zergling
 int MeleeManager::getAttackPriority(BWAPI::Unit * unit) 
 {
+	int frame = BWAPI::Broodwar->getFrameCount();
 	BWAPI::UnitType type = unit->getType();
 
 	// highest priority is something that can attack us or aid in combat
@@ -103,6 +105,15 @@ int MeleeManager::getAttackPriority(BWAPI::Unit * unit)
 	{
 		return 10;
 	} 
+	else if ((frame > 22000)
+			&& (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
+			&& (StrategyManager::Instance().getCurrentArmySizeAdvantage() > 50)
+			&& type.isBuilding())
+	{
+		// If we are close to defeating the enemy late game, target buildings to prevent
+		// extra units from being built
+		return 9;
+	}
 	// next priority is worker
 	else if (type.isWorker()) 
 	{

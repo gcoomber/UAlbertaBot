@@ -40,6 +40,7 @@ void Squad::update()
 
 		BWAPI::Broodwar->drawCircleMap(regroupPosition.x(), regroupPosition.y(), 30, BWAPI::Colors::Purple, true);
 
+		// Do not add call regroup for air manager. We dont want air units to regroup as this can cause them to idle
 		meleeManager.regroup(regroupPosition);
 		rangedManager.regroup(regroupPosition);
 	}
@@ -47,6 +48,7 @@ void Squad::update()
 	{
 		InformationManager::Instance().lastFrameRegroup = 1;
 
+		airManager.execute(order);
 		meleeManager.execute(order);
 		rangedManager.execute(order);
 		transportManager.execute(order);
@@ -108,6 +110,7 @@ void Squad::setNearEnemyUnits()
 
 void Squad::setManagerUnits()
 {
+	UnitVector airUnits;
 	UnitVector meleeUnits;
 	UnitVector rangedUnits;
 	UnitVector detectorUnits;
@@ -128,6 +131,16 @@ void Squad::setManagerUnits()
 			{
 				transportUnits.push_back(unit);
 			}
+			// Do not micromanage interceptors since they are a sub-unit of the carrier
+			else if (unit->getType() == BWAPI::UnitTypes::Protoss_Interceptor)
+			{
+				continue;
+			}
+			// select flying combat units
+			else if (unit->getType().isFlyer())
+			{
+				airUnits.push_back(unit);
+			}
 			// select ranged units
 			else if ((unit->getType().groundWeapon().maxRange() > 32) || (unit->getType() == BWAPI::UnitTypes::Protoss_Reaver))
 			{
@@ -141,6 +154,7 @@ void Squad::setManagerUnits()
 		}
 	}
 
+	airManager.setUnits(airUnits);
 	meleeManager.setUnits(meleeUnits);
 	rangedManager.setUnits(rangedUnits);
 	detectorManager.setUnits(detectorUnits);
@@ -160,6 +174,14 @@ bool Squad::needsToRegroup()
 	// If doing CannonTurtule strat and haven't lost our main attack, blitz
 	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle) &&
 		BWAPI::Broodwar->self()->deadUnitCount(BWAPI::UnitTypes::Protoss_Zealot) < 30) {
+		return false;
+	}
+	
+	// When attacking with the aggresive turtle build, only regroup if retreating is enabled
+	if (InformationManager::Instance().getIsAttacking()
+		&& (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
+		&& !StrategyManager::Instance().isRetreatEnabled())
+	{
 		return false;
 	}
 

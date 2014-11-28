@@ -29,16 +29,20 @@ class StrategyManager
 	std::vector<IntPair>		results;
 	std::vector<int>			usableStrategies;
 	int							currentStrategy;
+	int							currentArmySizeAdvantage;
 
 	BWAPI::Race					selfRace;
 	BWAPI::Race					enemyRace;
 
 	bool						firstAttackSent;
+	bool						allowRetreat;
 
 	void	addStrategies();
 	void	setStrategy();
 	void	readResults();
 	void	writeResults();
+
+	int							getMaxProbeCount() const;
 
 	const	int					getScore(BWAPI::Player * player) const;
 	const	double				getUCBValue(const size_t & strategy) const;
@@ -60,6 +64,8 @@ class StrategyManager
 	const	std::string			getProtossDragoonsOpeningBook() const;
 	const	MetaPairVector		getProtossDragoonsBuildOrderGoal() const;
 
+	const	MetaPairVector		getProtossAggressiveTurtleBuildOrderGoal() const;
+
 	const	MetaPairVector		getTerranBuildOrderGoal() const;
 	const	MetaPairVector		getZergBuildOrderGoal() const;
 
@@ -69,7 +75,7 @@ class StrategyManager
 
 public:
 
-	enum { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossCannonTurtle = 3, NumProtossStrategies = 4};
+	enum { ProtossZealotRush = 0, ProtossDarkTemplar = 1, ProtossDragoons = 2, ProtossCannonTurtle = 3, ProtossAggressiveTurtle = 4, NumProtossStrategies = 5 };
 	enum { TerranMarineRush=0, NumTerranStrategies=1 };
 	enum { ZergZerglingRush=0, NumZergStrategies=1 };
 
@@ -82,8 +88,14 @@ public:
 	const	int				    defendWithWorkers();
 	const	bool				rushDetected();
 
+	bool						isRetreatEnabled() const;
+	int							getCurrentArmySizeAdvantage() const;
+
 	const	int					getCurrentStrategy();
 
 	const	MetaPairVector		getBuildOrderGoal();
 	const	std::string			getOpeningBook() const;
+
+	std::vector<MetaType>		getCustomBuildOrder();
+	std::vector<MetaType>		getProtossAggressiveTurtleCustomBuildOrder();
 };

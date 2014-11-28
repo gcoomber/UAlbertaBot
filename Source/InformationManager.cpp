@@ -9,7 +9,7 @@ InformationManager::InformationManager()
 	: goForIt(false)
 	, map(BWAPI::Broodwar)
 	, lastFrameRegroup(false)
-	, attacking(false)
+	, isAttacking(false)
 {
 	initializeRegionInformation();
 }
@@ -448,6 +448,21 @@ bool InformationManager::enemyHasDetector()
 	return enemyUnitData.hasDetectorUnits();
 }
 
+// Check if the enmy has any flying combat units
+bool InformationManager::enemyFlyerThreat()
+{
+	BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
+	{
+		BWAPI::UnitType unitType = unit->getType();
+		if (unitType.isFlyer() && isCombatUnit(unitType))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool InformationManager::tileContainsUnit(BWAPI::TilePosition tile)
 {
 	return map.canBuildHere(tile);
@@ -504,4 +519,16 @@ int InformationManager::numEnemyCombatUnits(BWAPI::Player * player)
 		return -1;
 	}
 	return enemyCount;
+}
+
+// Getter function for the flag indicating if we are attacking the enemy
+bool InformationManager::getIsAttacking()
+{
+	return isAttacking;
+}
+
+// Sets the flag that indicates if we are attacking the enemy
+void InformationManager::setIsAttacking(bool attacking)
+{
+	isAttacking = attacking;
 }
