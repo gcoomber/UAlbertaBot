@@ -564,12 +564,15 @@ void ProductionManager::onGameEnd()
 // Returns true if the build order search should be used to set the build order.
 bool ProductionManager::useBuildOrderSearch()
 {
-	// Disable the build order search for the turtling carrier build if carriers can be built
-	// as attempting to build carriers using build order search causes crashes
+	// Disable the build order search the aggressive turtle build in late game.
+	// Helps with stability so the bot doesnt timeout
 	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
-		&& BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) > 0)
+		&& (BWAPI::Broodwar->getFrameCount() > 25000))
 	{
-		return false;
+		// If we are winning late game, disable the search
+		if ((BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus) > 2)
+			|| (StrategyManager::Instance().getCurrentArmySizeAdvantage() > 25))
+			return false;
 	}
 	else if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossExtendedZealotRush)
 		&& (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Citadel_of_Adun) > 0))

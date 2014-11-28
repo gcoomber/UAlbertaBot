@@ -65,6 +65,7 @@ class StrategyManager
 	const	std::string			getProtossDragoonsOpeningBook() const;
 	const	MetaPairVector		getProtossDragoonsBuildOrderGoal() const;
 
+	const	bool				expandProtossAggressiveTurtle() const;
 	const	MetaPairVector		getProtossAggressiveTurtleBuildOrderGoal() const;
 
 	const	MetaPairVector		getTerranBuildOrderGoal() const;

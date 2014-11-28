@@ -443,6 +443,26 @@ bool InformationManager::enemyHasCloakedUnits()
 	return enemyUnitData.hasCloakedUnits();
 }
 
+// Returns true if the enemy has cloacked combat units (not including detection)
+// that  can attack ground
+bool InformationManager::enemyHasCloakedGroundCombatUnits()
+{
+	bool hasCloaked = enemyUnitData.hasCloakedUnits();
+	if (hasCloaked)
+	{
+		BOOST_FOREACH(BWAPI::Unit * unit, BWAPI::Broodwar->enemy()->getUnits())
+		{
+			BWAPI::UnitType unitType;
+			if (unit->isCloaked() 
+				&& (unitType.groundWeapon() != BWAPI::WeaponTypes::None))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 bool InformationManager::enemyHasDetector()
 {
 	return enemyUnitData.hasDetectorUnits();

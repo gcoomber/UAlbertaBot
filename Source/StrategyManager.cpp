@@ -365,13 +365,11 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 		// If our force size is significantly greater than theirs, attack
 		else if (enemyForceSize != -1) {
 			doAttack = ((ourForceSize - enemyForceSize) >= 20);
-			InformationManager::Instance().setIsAttacking(doAttack);
 		}
 		// Could not get enemy force size
 		else {
 			doAttack = false;
 		}
-
 	}
 	// Don't rush with ProtossCannonTurtle strategy
 	else if (currentStrategy == ProtossAggressiveTurtle)
@@ -400,14 +398,14 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 			{
 				doAttack = (currentArmySizeAdvantage >= 10);
 			}
-
-			InformationManager::Instance().setIsAttacking(doAttack);
 		}
 		// Could not get enemy force size
 		else 
 		{
 			doAttack = false;
 		}
+
+		InformationManager::Instance().setIsAttacking(doAttack);
 	}
 	// Rush with other strategies
 	else {
@@ -527,6 +525,66 @@ const bool StrategyManager::expandProtossCannonTurtle() const
 		{
 			return true;
 		}
+	}
+	return false;
+}
+
+const bool StrategyManager::expandProtossAggressiveTurtle() const
+{
+	// if there is no place to expand to, we can't expand
+	if (MapTools::Instance().getNextExpansion() == BWAPI::TilePositions::None)
+	{
+		return false;
+	}
+
+	int numNexus = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numZealots = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
+	int frame = BWAPI::Broodwar->getFrameCount();
+	bool attack = InformationManager::Instance().getIsAttacking();
+
+	// if there are more than 10 idle workers, expand
+	if (WorkerManager::Instance().getNumIdleWorkers() > 8)
+	{
+		return true;
+	}
+
+	if (attack) 
+	{
+		// 2nd Nexus Conditions:
+		//		We have 12 or more zealots
+		//		It is past frame 7000
+		if ((numNexus < 2) && (numZealots > 12 || frame > 9000))
+		{
+			return true;
+		}
+
+		// 3nd Nexus Conditions:
+		//		We have 24 or more zealots
+		//		It is past frame 12000
+		if ((numNexus < 3) && (numZealots > 24 || frame > 15000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 4) && (numZealots > 24 || frame > 21000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 5) && (numZealots > 24 || frame > 26000))
+		{
+			return true;
+		}
+
+		if ((numNexus < 6) && (numZealots > 24 || frame > 30000))
+		{
+			return true;
+		}
+	}
+	// If we aren't under pressure in late game
+	else if ((frame > 18000) && (numZealots > 25))
+	{
+		return true;
 	}
 	return false;
 }
@@ -983,8 +1041,10 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	// Set the max probes wanted given the number of nexuses
 	int maxProbes = getMaxProbeCount();
 
-	// Cloaked unit check
-	if (InformationManager::Instance().enemyHasCloakedUnits())
+	int frame = BWAPI::Broodwar->getFrameCount();
+
+	// Only need detection if the enemy has cloaked units that can attack ground
+	if (InformationManager::Instance().enemyHasCloakedGroundCombatUnits())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
 
@@ -998,6 +1058,12 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 		}
 	}
 
+	// Expansion condition
+	if (expandProtossCannonTurtle())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
+	}
+
 	if (needAirCounter && (numCyber > 0))
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Stargate, 2));
@@ -1008,13 +1074,7 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Assimilator, 1));
 	}
 
-	// Build Cyber Core for carrier support late game
-	if (BWAPI::Broodwar->getFrameCount() > 20000)
-	{
-		gatewayWanted = 8;
-		zealotsWanted = numZealots + 12;
-	}
-	else if (BWAPI::Broodwar->getFrameCount() > 12000)
+	if (frame > 12000)
 	{
 		gatewayWanted = 6;
 		zealotsWanted = numZealots + 8;
@@ -1036,12 +1096,6 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Citadel_of_Adun) > 0)
 	{
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Leg_Enhancements, 1));
-		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Weapons, 1));
-	}
-
-	if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) > 0)
-	{
-		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Protoss_Ground_Armor, 1));
 	}
 
 	if ((numCyber > 0))
@@ -1063,13 +1117,6 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	else if ((numNexusCompleted >= 2) && !needAirCounter)
 	{
 		dragoonsWanted += 4;
-	}
-
-
-	// Expansion condition
-	if (expandProtossCannonTurtle())
-	{
-		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
 
 	// Build order goal requirements
@@ -1155,41 +1202,51 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
  // build order search is disabled for the aggressive turtle build
  std::vector<MetaType> StrategyManager::getProtossAggressiveTurtleCustomBuildOrder()
  {
-	 // frame count
-	 // army size
-	 // supply
-	 // expansions
+	 // If the enemy has flying units that can attack, prepare an air defense
+	 bool needAirCounter = InformationManager::Instance().enemyFlyerThreat();
 
+	// Vector of units/buildings/ugrades to build
+	std::vector<MetaType> customBuildOrder;
 
+	// First build a python if we are low in supply
+	int totalSupply = BWAPI::Broodwar->self()->supplyTotal();
+	int supplyAvailable = std::max(0, totalSupply - BWAPI::Broodwar->self()->supplyUsed());
+	if ((supplyAvailable < 10) && (totalSupply < 200))
+	{
+		customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+		customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+	}
 
-	 // Vector of units/buildings/ugrades to build
-	 std::vector<MetaType> customBuildOrder;
+	// Only need detection if the enemy has cloaked units that can attack ground
+	if (InformationManager::Instance().enemyHasCloakedGroundCombatUnits())
+	{
+		customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Robotics_Facility);
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
+		{
+			customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Observatory);
+		}
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Observatory) > 0)
+		{
+			customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Observer);
+		}
+	}
 
-	 int zealotsWanted = 0;
+	if (needAirCounter)
+	{
+		if (supplyAvailable > 8)
+		{
+			customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Dragoon);
+			customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Dragoon);
+		}
+	}
+	// Fill remaining supply with zealots
+	else if (supplyAvailable > 4)
+	{
+		customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+		customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+	}
 
-	 // First build a python if we are low in supply
-	 int totalSupply = BWAPI::Broodwar->self()->supplyTotal();
-	 int supplyAvailable = std::max(0, totalSupply - BWAPI::Broodwar->self()->supplyUsed());
-	 if ((supplyAvailable < 10) && (totalSupply < 200))
-	 {
-		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
-		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
-	 }
-
-	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
-	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
-
-	 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Carrier_Capacity) < 1)
-	 {
-		 customBuildOrder.push_back(BWAPI::UpgradeTypes::Carrier_Capacity);
-	 }
-
-	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Carrier);
-	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Carrier);
-	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
-	 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
-
-	 return customBuildOrder;
+	return customBuildOrder;
  }
 
  // Get the max probes allowed given the number of nexuses

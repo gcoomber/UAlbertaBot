@@ -85,6 +85,7 @@ public:
 
 	bool						enemyHasCloakedUnits();
 	bool						enemyHasDetector();
+	bool						enemyHasCloakedGroundCombatUnits();
 
 	bool						getIsAttacking();
 	void						setIsAttacking(bool attacking);

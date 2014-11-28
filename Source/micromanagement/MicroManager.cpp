@@ -44,7 +44,7 @@ void MicroManager::execute(const SquadOrder & inputOrder)
 		{
 			// For aggressive turtle strategy, stay closer to the base center early game 
 			// since we have fewer cannons
-			defendRadius = (frame < 10000) ? 550 : 800;
+			defendRadius = (frame < 18000) ? 550 : 700;
 		}
 		else if (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossCannonTurtle)
 		{
