@@ -30,6 +30,7 @@ void StrategyManager::addStrategies()
 
 	//protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 0 3 0 0 3 0 1 3 0 4 4 4 4 4 1 0 4 4 4";
     protossOpeningBook[ProtossZealotRush]	= "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 4 1 0 4 4 4";
+	protossOpeningBook[ProtossExtendedZealotRush] = protossOpeningBook[ProtossZealotRush];
 	protossOpeningBook[ProtossCannonTurtle] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 1 4 9 0 10 10 10";
 	protossOpeningBook[ProtossAggressiveTurtle] = "0 0 0 0 1 0 3 3 0 0 4 1 4 4 0 4 4 0 1 4 3 0 1 0 4 0 4 4 4 1 4 9 0 10 10 10";
 	//protossOpeningBook[ProtossDarkTemplar]	= "0 0 0 0 1 3 0 7 5 0 0 12 3 13 0 22 22 22 22 0 1 0";
@@ -49,6 +50,7 @@ void StrategyManager::addStrategies()
 			usableStrategies.push_back(ProtossDragoons);
 			usableStrategies.push_back(ProtossCannonTurtle);
 			usableStrategies.push_back(ProtossAggressiveTurtle);
+			usableStrategies.push_back(ProtossExtendedZealotRush);
 		}
 		else if (enemyRace == BWAPI::Races::Terran)
 		{
@@ -57,6 +59,7 @@ void StrategyManager::addStrategies()
 			usableStrategies.push_back(ProtossDragoons);
 			usableStrategies.push_back(ProtossCannonTurtle);
 			usableStrategies.push_back(ProtossAggressiveTurtle);
+			usableStrategies.push_back(ProtossExtendedZealotRush);
 		}
 		else if (enemyRace == BWAPI::Races::Zerg)
 		{
@@ -64,6 +67,7 @@ void StrategyManager::addStrategies()
 			usableStrategies.push_back(ProtossDragoons);
 			usableStrategies.push_back(ProtossCannonTurtle);
 			usableStrategies.push_back(ProtossAggressiveTurtle);
+			usableStrategies.push_back(ProtossExtendedZealotRush);
 		}
 		else
 		{
@@ -72,6 +76,7 @@ void StrategyManager::addStrategies()
 			usableStrategies.push_back(ProtossDragoons);
 			usableStrategies.push_back(ProtossCannonTurtle);
 			usableStrategies.push_back(ProtossAggressiveTurtle);
+			usableStrategies.push_back(ProtossExtendedZealotRush);
 		}
 	}
 	else if (selfRace == BWAPI::Races::Terran)
@@ -139,6 +144,11 @@ void StrategyManager::readResults()
 		results[ProtossCannonTurtle].first = atoi(line.c_str());
 		getline(f_in, line);
 		results[ProtossCannonTurtle].second = atoi(line.c_str());
+
+		getline(f_in, line);
+		results[ProtossExtendedZealotRush].first = atoi(line.c_str());
+		getline(f_in, line);
+		results[ProtossExtendedZealotRush].second = atoi(line.c_str());
 		f_in.close();
 	}
 
@@ -159,6 +169,9 @@ void StrategyManager::writeResults()
 	f_out << results[ProtossDragoons].second    << "\n";
 	f_out << results[ProtossCannonTurtle].first << "\n";
 	f_out << results[ProtossCannonTurtle].second << "\n";
+
+	f_out << results[ProtossExtendedZealotRush].first << "\n";
+	f_out << results[ProtossExtendedZealotRush].second << "\n";
 	
 
 	f_out.close();
@@ -541,6 +554,10 @@ const MetaPairVector StrategyManager::getBuildOrderGoal()
 		{
 			return getProtossAggressiveTurtleBuildOrderGoal();
 		}
+		else if (getCurrentStrategy() == ProtossExtendedZealotRush)
+		{
+			return getProtossExtendedZealotRushBuildOrderGoal();
+		}
 
 		// if something goes wrong, use zealot goal
 		return getProtossZealotRushBuildOrderGoal();
@@ -761,6 +778,82 @@ const MetaPairVector StrategyManager::getProtossZealotRushBuildOrderGoal() const
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot,	zealotsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway,	gatewayWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe,	std::min(90, probesWanted)));
+
+	return goal;
+}
+
+const MetaPairVector StrategyManager::getProtossExtendedZealotRushBuildOrderGoal() const
+{
+	// the goal to return
+	MetaPairVector goal;
+
+	int numZealots = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Zealot);
+	int numDragoons = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Dragoon);
+	int numProbes = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Probe);
+	int numNexusCompleted = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numNexusAll = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Nexus);
+	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
+	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+
+	int zealotsWanted = numZealots + 8;
+	int dragoonsWanted = numDragoons;
+	int gatewayWanted = 3;
+	int probesWanted = numProbes + 4;
+
+	if (InformationManager::Instance().enemyHasCloakedUnits())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
+
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Robotics_Facility) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observatory, 1));
+		}
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Observatory) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
+		}
+	}
+
+	if (numNexusAll >= 2 || BWAPI::Broodwar->getFrameCount() > 9000)
+	{
+		gatewayWanted = 6;
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Assimilator, 1));
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Cybernetics_Core, 1));
+
+		if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Assimilator) > 0)
+		{
+			goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1));
+			goal.push_back(MetaPair(BWAPI::UpgradeTypes::Leg_Enhancements, 1));
+		}
+	}
+
+	if (numCyber > 0)
+	{
+		dragoonsWanted = numDragoons + 2;
+		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Singularity_Charge, 1));
+	}
+
+	if (numNexusCompleted >= 3)
+	{
+		gatewayWanted = 8;
+		dragoonsWanted = numDragoons + 6;
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
+	}
+
+	if (numNexusAll > 1)
+	{
+		probesWanted = numProbes + 6;
+	}
+
+	if (expandProtossZealotRush())
+	{
+		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
+	}
+
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot, zealotsWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));
+	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Probe, std::min(90, probesWanted)));
 
 	return goal;
 }
@@ -1048,6 +1141,9 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 	 case ProtossAggressiveTurtle:
 		 customBuildOrder = getProtossAggressiveTurtleCustomBuildOrder();
 		 break;
+	 case ProtossExtendedZealotRush:
+		 customBuildOrder = getProtossExtendedZealotRushCustomBuildOrder();
+		 break;
 	 default:
 		 break;
 	 }
@@ -1112,4 +1208,149 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
  int StrategyManager::getCurrentArmySizeAdvantage() const
  {
 	 return currentArmySizeAdvantage;
+ }
+
+ std::vector<MetaType> StrategyManager::getProtossExtendedZealotRushCustomBuildOrder()
+ {
+	 std::vector<MetaType> customBuildOrder;
+
+	 int supplyAvailable = BWAPI::Broodwar->self()->supplyTotal() - BWAPI::Broodwar->self()->supplyUsed();
+	 // Add as many zealots as possible (up to 4)
+	 for (int i = 0; (i < 4) && (supplyAvailable > BWAPI::UnitTypes::Protoss_Zealot.supplyRequired()); ++i)
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+		 supplyAvailable -= BWAPI::UnitTypes::Protoss_Zealot.supplyRequired();
+	 }
+
+	 // Add 2 probes if possible
+	 if (supplyAvailable >= 2 * BWAPI::UnitTypes::Protoss_Probe.supplyRequired())
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Probe);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Probe);
+	 }
+
+	 // if we have a completed cybernetics core
+	 if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core) > 0)
+	 {
+		 // make sure singularity charge is upgraded or upgrading
+		 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge) > 0
+			 || BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Singularity_Charge))
+		 {
+			 // add two dragoons if possible
+			 if (supplyAvailable >= 2 * BWAPI::UnitTypes::Protoss_Dragoon.supplyRequired())
+			 {
+				 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Dragoon);
+				 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Dragoon);
+			 }
+		 }
+		 // we need singularity charge
+		 else
+		 {
+			 customBuildOrder.push_back(BWAPI::UpgradeTypes::Singularity_Charge);
+		 }
+	 }
+
+	 // if we have a forge
+	 if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge) > 0)
+	 {
+		 // if we are not upgrading weapons already
+		 if (!BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Ground_Weapons))
+		 {
+			 // if we have not maxed out the weapons upgrade
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons)
+				 < BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons))
+			 {
+				 // if we have the level 1 weapons upgrade
+				 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) <= 1
+					 && (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Templar_Archives) == 0))
+				 {
+					 // add the templar archives
+					 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Templar_Archives);
+				 }
+				 // if we have level 0 or level 1  and a templar archive
+				 if ((BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Templar_Archives) > 0)
+					 || (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) == 0))
+				 {
+					 // get the next weapons upgrade level
+					 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Weapons);
+				 }
+			 }
+		 }
+		 // if we only have 1 forge
+		 if (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Forge) == 1)
+		 {
+			 // build another forge
+			 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Forge);
+		 }
+		 // if armour is not upgrading and we have more than 1 forge
+		 if (!BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
+			 && BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Forge) > 1)
+		 {
+			 // if the armour upgrade is not max level
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
+				 < BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor))
+			 {
+				 // if we have level 0 or level 1  and a templar archive
+				 if ((BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Templar_Archives) > 0)
+					 || (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor) == 0))
+				 {
+					 // get the armour upgrade
+					 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Armor);
+				 }
+			 }
+		 }
+		 // if we ended up with more than 2 forges
+		 if (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Forge) > 2)
+		 {
+			 // if plasma shields are not max level and not upgrading
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields)
+				 && !BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
+			 {
+				 // upgrade plasma shields
+				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Plasma_Shields);
+			 }
+		 }
+		 // if we have only 2 forges and have maxed out either weapons or armour
+		 else if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor) == BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Armor)
+			 || BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons) == BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Ground_Weapons))
+		 {
+			 // if plasma shields are not max level and not upgrading
+			 if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields) != BWAPI::Broodwar->self()->getMaxUpgradeLevel(BWAPI::UpgradeTypes::Protoss_Plasma_Shields)
+				 && !BWAPI::Broodwar->self()->isUpgrading(BWAPI::UpgradeTypes::Protoss_Plasma_Shields))
+			 {
+				 // upgrade plasma shields
+				 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Plasma_Shields);
+			 }
+		 }
+	 }
+	 // we have no forges
+	 else
+	 {
+		 // add a forge and get it to research weapons
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Forge);
+		 customBuildOrder.push_back(BWAPI::UpgradeTypes::Protoss_Ground_Weapons);
+	 }
+
+	 // if we need more supply and have not reached the maximum supply
+	 if (supplyAvailable < 20 && BWAPI::Broodwar->self()->supplyTotal() < 200)
+	 {
+		 // build 2 more pylons
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Pylon);
+	 }
+
+	 // Add as many zealots as possible (up to 4)
+	 for (int i = 0; (i < 4) && (supplyAvailable > BWAPI::UnitTypes::Protoss_Zealot.supplyRequired()); ++i)
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Zealot);
+		 supplyAvailable -= BWAPI::UnitTypes::Protoss_Zealot.supplyRequired();
+	 }
+
+	 if (customBuildOrder.empty())
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	 }
+
+	 return customBuildOrder;
  }

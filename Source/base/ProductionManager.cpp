@@ -458,7 +458,14 @@ BWAPI::Unit * ProductionManager::selectUnitOfType(BWAPI::UnitType type, bool lea
 				}
 			}
 		}
-
+		// if it is a forge we are worried about upgrade time not training time
+	} else if (type == BWAPI::UnitTypes::Protoss_Forge) {
+		BOOST_FOREACH(BWAPI::Unit *u, BWAPI::Broodwar->self()->getUnits())
+		{
+			if (u->getType() == type && u->isCompleted() && !u->isUpgrading() && !u->isLifted() && !u->isUnpowered()) {
+				return u;
+			}
+		}
 		// if it is a building and we are worried about selecting the unit with the least
 		// amount of training time remaining
 	} else if (type.isBuilding() && leastTrainingTimeRemaining) {
@@ -561,6 +568,11 @@ bool ProductionManager::useBuildOrderSearch()
 	// as attempting to build carriers using build order search causes crashes
 	if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
 		&& BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Fleet_Beacon) > 0)
+	{
+		return false;
+	}
+	else if ((StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossExtendedZealotRush)
+		&& (BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Citadel_of_Adun) > 0))
 	{
 		return false;
 	}
