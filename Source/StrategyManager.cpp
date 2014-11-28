@@ -804,5 +804,11 @@ const MetaPairVector StrategyManager::getZergBuildOrderGoal() const
 		 supplyAvailable -= BWAPI::UnitTypes::Protoss_Zealot.supplyRequired();
 	 }
 
+	 if (customBuildOrder.empty())
+	 {
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+		 customBuildOrder.push_back(BWAPI::UnitTypes::Protoss_Photon_Cannon);
+	 }
+
 	 return customBuildOrder;
  }
