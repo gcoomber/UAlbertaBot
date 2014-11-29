@@ -374,6 +374,8 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 		else {
 			doAttack = false;
 		}
+
+		InformationManager::Instance().setIsAttacking(doAttack);
 	}
 	// Don't rush with ProtossCannonTurtle strategy
 	else if (currentStrategy == ProtossAggressiveTurtle)
