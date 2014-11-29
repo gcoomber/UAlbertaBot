@@ -104,8 +104,8 @@ void StrategyManager::readResults()
 	// if the file doesn't exist something is wrong so just set them to default settings
 	if (stat(Options::FileIO::FILE_SETTINGS, &buf) == -1)
 	{
-		readDir = "bwapi-data/testio/read/";
-		writeDir = "bwapi-data/testio/write/";
+		readDir = "bwapi-data/read/";
+		writeDir = "bwapi-data/write/";
 	}
 	else
 	{
@@ -382,8 +382,13 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 	{
 		if (enemyForceSize != -1 || (frame > 15000))
 		{
+			// Allow retreat if the enemy has cloaked ground units
+			if (InformationManager::Instance().enemyHasCloakedUnits())
+			{
+				allowRetreat = (currentArmySizeAdvantage < 30);
+			}
 			// Update the retreat flag based on army sizes
-			if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Leg_Enhancements) > 0)
+			else if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Leg_Enhancements) > 0)
 			{
 				// Retreat less frequently if we have leg enhancements
 				allowRetreat = (currentArmySizeAdvantage < -5);
@@ -394,7 +399,13 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 			}
 
 			// Determine if we should attack
-			if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Leg_Enhancements) > 0)
+			// Allow retreat if the enemy has cloaked ground units
+			if (InformationManager::Instance().enemyHasCloakedUnits())
+			{
+				doAttack = ((currentArmySizeAdvantage > 10) && (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Observer) > 0))
+							|| ((frame > 20000) && (currentArmySizeAdvantage > 10));
+			}
+			else if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Leg_Enhancements) > 0)
 			{
 				// If we have leg enhancements, allow our army to attack a more powerfull army
 				// Or if in late game, attack so we don't mine out with our 1 base
@@ -1050,7 +1061,7 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	int frame = BWAPI::Broodwar->getFrameCount();
 
 	// Only need detection if the enemy has cloaked units that can attack ground
-	if (InformationManager::Instance().enemyHasCloakedGroundCombatUnits())
+	if (InformationManager::Instance().enemyHasCloakedUnits())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Robotics_Facility, 1));
 
@@ -1065,7 +1076,7 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	}
 
 	// Expansion condition
-	if (expandProtossCannonTurtle())
+	if (expandProtossAggressiveTurtle())
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Nexus, numNexusAll + 1));
 	}
