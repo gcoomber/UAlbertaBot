@@ -101,13 +101,14 @@ int MeleeManager::getAttackPriority(BWAPI::Unit * unit)
 		type ==  BWAPI::UnitTypes::Terran_Bunker ||
 		type == BWAPI::UnitTypes::Protoss_High_Templar ||
 		type == BWAPI::UnitTypes::Protoss_Reaver ||
-		(type.isWorker() && unitNearChokepoint(unit))) 
+		(type.isWorker() && unitNearChokepoint(unit)) || 
+		(type.isWorker() && unit->isRepairing())) 
 	{
 		return 10;
 	} 
 	else if ((frame > 22000)
 			&& (StrategyManager::Instance().getCurrentStrategy() == StrategyManager::ProtossAggressiveTurtle)
-			&& (StrategyManager::Instance().getCurrentArmySizeAdvantage() > 50)
+			&& (StrategyManager::Instance().getCurrentArmySizeAdvantage() > 60)
 			&& type.isBuilding())
 	{
 		// If we are close to defeating the enemy late game, target buildings to prevent

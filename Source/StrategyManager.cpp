@@ -229,7 +229,7 @@ void StrategyManager::setStrategy()
         {
             //currentStrategy = ProtossZealotRush;
 			//currentStrategy = ProtossCannonTurtle;
-			currentStrategy = ProtossAggressiveTurtle;
+			currentStrategy = ProtossZealotRush;
         }
 	}
 
@@ -380,7 +380,7 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 	// Don't rush with ProtossCannonTurtle strategy
 	else if (currentStrategy == ProtossAggressiveTurtle)
 	{
-		if (enemyForceSize != -1 || (frame > 15000))
+		if ((enemyForceSize != -1) || (frame > 15000))
 		{
 			// Allow retreat if the enemy has cloaked ground units
 			if (InformationManager::Instance().enemyHasCloakedUnits())
@@ -1035,7 +1035,6 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	int numCyber = BWAPI::Broodwar->self()->completedUnitCount(BWAPI::UnitTypes::Protoss_Cybernetics_Core);
 	int numCannon = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Photon_Cannon);
 	int numStargate = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Stargate);
-	int numScouts = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Scout);
 	int numCorsairs = BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Corsair);
 
 	int zealotsWanted = numZealots + 8;
@@ -1043,7 +1042,6 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	int gatewayWanted = 3;
 	int probesWanted = numProbes + 4;
 	int cannonsWanted = numCannon;
-	int scoutsWanted = numScouts;
 	int corsairsWanted = numCorsairs;
 
 	// Check if the bot is currently attacking
@@ -1115,23 +1113,20 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 		goal.push_back(MetaPair(BWAPI::UpgradeTypes::Leg_Enhancements, 1));
 	}
 
+	// Build citadel of adun as soon as possible to allow research of Zealot Leg enhancements
 	if ((numCyber > 0))
 	{
 		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Citadel_of_Adun, 1));
 	}
 
+	// Response to air threat
 	if ((numStargate > 0) && needAirCounter)
 	{
 		dragoonsWanted += 4;
-		corsairsWanted = std::min(corsairsWanted + 2, 8);
+		corsairsWanted = std::min(corsairsWanted + 2, 10);
 	}
 
-	// Get some observers if we've expanded
-	if (numNexusCompleted >= 3)
-	{
-		goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Observer, 1));
-	}
-	else if ((numNexusCompleted >= 2) && !needAirCounter)
+	if ((numNexusCompleted >= 2) && !needAirCounter)
 	{
 		dragoonsWanted += 4;
 	}
@@ -1141,7 +1136,6 @@ const MetaPairVector StrategyManager::getProtossAggressiveTurtleBuildOrderGoal()
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Dragoon, dragoonsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Zealot, zealotsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Gateway, gatewayWanted));
-	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Scout, scoutsWanted));
 	goal.push_back(MetaPair(BWAPI::UnitTypes::Protoss_Corsair, corsairsWanted));
 
 	// Only build probes if we do not have too many idle probes

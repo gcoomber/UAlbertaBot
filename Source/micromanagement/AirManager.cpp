@@ -66,19 +66,10 @@ void AirManager::executeMicro(const UnitVector & targets)
 
 void AirManager::kiteTarget(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 {
-
-	// if we can't kite it, there's no point
-	smartAttackUnit(airUnit, target);
-	return;
-
-	double range(airUnit->getType().groundWeapon().maxRange());
-	if (airUnit->getType() == BWAPI::UnitTypes::Protoss_Dragoon && BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Singularity_Charge))
-	{
-		range = 6 * 32;
-	}
+	double range = airUnit->getType().airWeapon().maxRange();
 
 	// determine whether the target can be kited
-	if (range <= target->getType().groundWeapon().maxRange())
+	if (range <= target->getType().airWeapon().maxRange())
 	{
 		// if we can't kite it, there's no point
 		smartAttackUnit(airUnit, target);
@@ -91,7 +82,7 @@ void AirManager::kiteTarget(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 	double		speed(airUnit->getType().topSpeed());
 
 	double	timeToEnter = std::max(0.0, (dist - range) / speed);
-	if ((timeToEnter >= airUnit->getGroundWeaponCooldown()) && (dist >= minDist))
+	if ((timeToEnter >= airUnit->getAirWeaponCooldown()) && (dist >= minDist))
 	{
 		kite = false;
 	}
@@ -127,7 +118,7 @@ void AirManager::kiteTarget(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 // get a target for the air unit to attack
 BWAPI::Unit * AirManager::getTarget(BWAPI::Unit * airUnit, UnitVector & targets)
 {
-	int range(airUnit->getType().groundWeapon().maxRange());
+	int range(airUnit->getType().airWeapon().maxRange());
 
 	int highestInRangePriority(0);
 	int highestNotInRangePriority(0);
@@ -176,20 +167,13 @@ int AirManager::getAttackPriority(BWAPI::Unit * airUnit, BWAPI::Unit * target)
 	BWAPI::UnitType airUnitType = airUnit->getType();
 	BWAPI::UnitType targetType = target->getType();
 
-	bool canAttackUs = airUnitType.isFlyer() ? targetType.airWeapon() != BWAPI::WeaponTypes::None : targetType.groundWeapon() != BWAPI::WeaponTypes::None;
-
-
+	bool canAttackUs = targetType.airWeapon() != BWAPI::WeaponTypes::None;
 
 	// highest priority is something that can attack us or aid in combat
 	if (targetType == BWAPI::UnitTypes::Terran_Medic || canAttackUs ||
 		targetType == BWAPI::UnitTypes::Terran_Bunker)
 	{
 		return 3;
-	}
-	// next priority is worker
-	else if (targetType.isWorker())
-	{
-		return 2;
 	}
 	// then everything else
 	else
@@ -221,8 +205,5 @@ bool AirManager::isValidTarget(BWAPI::Unit * target) const
 	// Only allow air units to attack air units, or harrass probes
 	BWAPI::UnitType targetType = target->getType();
 
-	return (targetType == BWAPI::UnitTypes::Protoss_Probe)
-		|| (targetType == BWAPI::UnitTypes::Terran_SCV)
-		|| (targetType == BWAPI::UnitTypes::Zerg_Drone)
-		|| targetType.isFlyer();
+	return targetType.isFlyer();
 }
