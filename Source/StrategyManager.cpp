@@ -227,8 +227,6 @@ void StrategyManager::setStrategy()
         }
         else
         {
-            //currentStrategy = ProtossZealotRush;
-			//currentStrategy = ProtossCannonTurtle;
 			currentStrategy = ProtossZealotRush;
         }
 	}
@@ -403,7 +401,7 @@ const bool StrategyManager::doAttack(const std::set<BWAPI::Unit *> & freeUnits)
 			if (InformationManager::Instance().enemyHasCloakedUnits())
 			{
 				doAttack = ((currentArmySizeAdvantage > 10) && (BWAPI::Broodwar->self()->allUnitCount(BWAPI::UnitTypes::Protoss_Observer) > 0))
-							|| ((frame > 20000) && (currentArmySizeAdvantage > 10));
+							|| ((frame > 20000) && (currentArmySizeAdvantage > 20));
 			}
 			else if (BWAPI::Broodwar->self()->getUpgradeLevel(BWAPI::UpgradeTypes::Leg_Enhancements) > 0)
 			{
